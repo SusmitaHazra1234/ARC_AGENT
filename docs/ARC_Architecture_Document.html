@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ARC — Solution Architecture Document v1.0</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm 16mm 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 10pt; line-height: 1.35; color: #1a1a1a; margin: 0; padding: 0 4px; }
+  .cover { page-break-after: always; padding: 40px 18px 32px; }
+  .cover h1 { font-size: 19pt; color: #1f3864; margin: 0 0 4px; }
+  .cover h2 { font-size: 12.5pt; color: #2e5090; font-weight: 600; margin: 0 0 18px; }
+  .cover-table th { background: #1f3864; color: #fff; width: 34%; }
+  .principle-box { background: #f0f4fa; border: 1px solid #c5cfe0; padding: 12px 16px; margin: 14px 0 8px; font-size: 10pt; }
+  h1.sec { font-size: 13.5pt; color: #fff; background: #1f3864; padding: 7px 12px; margin: 18px 0 8px; page-break-after: avoid; }
+  h2.sub { font-size: 11pt; color: #2e5090; margin: 12px 0 6px; page-break-after: avoid; }
+  p { margin: 5px 0 8px; }
+  ul.compact { margin: 5px 0; padding-left: 18px; }
+  ul.compact li { margin-bottom: 2px; }
+  table.simple { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.5pt; }
+  table.simple th { background: #2e5090; color: #fff; padding: 5px 8px; text-align: left; border: 1px solid #2e5090; }
+  table.simple td { border: 1px solid #ccc; padding: 5px 8px; vertical-align: top; }
+  .page-break { page-break-before: always; }
+  .arch { font-family: Consolas, monospace; font-size: 7.8pt; background: #f8f9fb; border: 1px solid #d0d7e2; padding: 12px; margin: 8px 0; white-space: pre; line-height: 1.28; page-break-inside: avoid; }
+  .highlight { background: #fef2f2; border-left: 4px solid #dc2626; padding: 8px 12px; margin: 8px 0; font-size: 9.5pt; }
+  .tbc { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 8px 12px; margin: 8px 0; font-size: 9.5pt; }
+  .summary-box { background: #f0f4fa; border: 2px solid #2e5090; padding: 12px 16px; margin: 12px 0; font-size: 9.5pt; }
+  .dont-box { background: #fef2f2; border: 1px solid #fca5a5; padding: 10px 12px; margin: 8px 0; font-size: 9pt; }
+  .end { text-align: center; font-weight: bold; color: #1f3864; margin-top: 24px; padding: 16px; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Solution Architecture Document</h1>
+  <h2>ARC — Agentic Receivables Recovery and<br>Section 138 Legal Action Pipeline</h2>
+  <table class="simple cover-table" style="max-width:680px;">
+    <tr><th>Attribute</th><th>Value</th></tr>
+    <tr><td>Solution</td><td>ARC</td></tr>
+    <tr><td>Primary Reference</td><td>Problem_Statement_1_Receivables_Recovery_Section138 (Organization-approved)</td></tr>
+    <tr><td>Stack</td><td>C# · .NET 9 · Microsoft Agent Framework 1.0 · Azure</td></tr>
+    <tr><td>Version</td><td>1.0</td></tr>
+    <tr><td>Date</td><td>28-Aug-2026</td></tr>
+    <tr><td>Status</td><td>Architecture — Pre-Implementation</td></tr>
+  </table>
+  <div class="principle-box">
+    <strong>Architecture principle:</strong> AI reasoning, orchestration and explanation sit above governed tools. Money, dates, eligibility, authorization and persistence are always deterministic — rules engine, metric contracts, SQL/graph queries, and human gates. The LLM never computes legal amounts, statutory dates, or eligibility verdicts.
+  </div>
+</div>
+
+<!-- 1 -->
+<h1 class="sec">1. Architecture Overview</h1>
+<p>ARC is a <strong>layered, durable, human-gated agentic workflow system</strong> for PaintCo receivables recovery. It implements two Microsoft Agent Framework (MAF) workflows sharing upstream reconciliation (A1), eight specialised executors (A1–A8), a versioned rules engine (R1–R6), governed tools, and four mandatory human approval gates.</p>
+
+<table class="simple">
+  <tr><th>Layer</th><th>Responsibility</th><th>Technologies</th></tr>
+  <tr><td>Presentation / Integration</td><td>Gate UI, dashboards, NLQ, field app hooks</td><td>ARC.Api (Container Apps), Entra ID</td></tr>
+  <tr><td>Workflow Orchestration</td><td>Multi-day MAF graphs, RequestPort suspensions, fan-out/fan-in</td><td>ARC.Host.Functions, MAF Durable</td></tr>
+  <tr><td>Agents / Executors</td><td>A1–A8 — bounded reasoning, tool selection, drafting</td><td>ARC.Agents</td></tr>
+  <tr><td>Governed Tools</td><td>Typed tool surface + MCP</td><td>ARC.Tools</td></tr>
+  <tr><td>Business Services</td><td>Rules engine, limitation clock, metric contracts, outbound gate</td><td>ARC.Domain + ARC.Data</td></tr>
+  <tr><td>Knowledge / Retrieval</td><td>Graph, hybrid search, document extraction</td><td>ARC.Knowledge</td></tr>
+  <tr><td>Data</td><td>Master data, workflow state, documents</td><td>Azure SQL, Cosmos DB, Blob</td></tr>
+  <tr><td>External Systems</td><td>ERP ledger, field app, advocate/court (manual beyond filing readiness)</td><td>SAP, Portal, Field App</td></tr>
+</table>
+
+<div class="summary-box">
+  <strong>Layered flow:</strong><br>
+  User / Business Systems → ARC API → MAF Workflow Orchestration → Agents/Executors → Governed Tools → Business Services/Rules → Data &amp; External Systems
+</div>
+
+<h2 class="sub">1.1 Mandated Technical Stack (from Source)</h2>
+<table class="simple">
+  <tr><th>Concern</th><th>Service / Package</th></tr>
+  <tr><td>Runtime</td><td>C# · .NET 9</td></tr>
+  <tr><td>Orchestration</td><td>Microsoft Agent Framework 1.0 — WorkflowBuilder, RequestPort, durable checkpoints</td></tr>
+  <tr><td>Models</td><td>Azure OpenAI (Foundry) — reasoning for A3/A4 explanation; cheaper model for extraction/summary</td></tr>
+  <tr><td>Master data</td><td>Azure SQL</td></tr>
+  <tr><td>Workflow state / vector</td><td>Azure Cosmos DB (checkpoints, cycle state, documents, learned facts, audit events)</td></tr>
+  <tr><td>Documents</td><td>Azure Blob (WORM legal artefacts, 8-year retention)</td></tr>
+  <tr><td>Document AI</td><td>Azure AI Document Intelligence</td></tr>
+  <tr><td>Voice PTP</td><td>Azure AI Speech</td></tr>
+  <tr><td>Compute</td><td>Azure Functions (durable host) + Azure Container Apps (API)</td></tr>
+  <tr><td>Messaging</td><td>Azure Service Bus (cycle fan-out, alerts)</td></tr>
+  <tr><td>Identity / Secrets</td><td>Microsoft Entra ID, managed identity, Azure Key Vault</td></tr>
+  <tr><td>Observability</td><td>Application Insights + OpenTelemetry</td></tr>
+  <tr><td>Resilience</td><td>Polly (retry/circuit breaker)</td></tr>
+  <tr><td>Tool protocol</td><td>MCP server exposing same contracts as AIFunction tools</td></tr>
+</table>
+
+<!-- 2 -->
+<h1 class="sec page-break">2. Final Solution Architecture Diagram</h1>
+<div class="arch">  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  USERS: Depot Manager · TSI · Depot Admin · Legal · Advocate · Finance   │
+  │  SYSTEMS: SAP/ERP · Portal · Field Mobile App                           │
+  └───────────────────────────────┬─────────────────────────────────────────┘
+                                  │  HTTPS (Entra ID)
+                                  ▼
+                    ┌─────────────────────────────┐
+                    │         ARC.Api              │  ← Container Apps
+                    │  Gates · Dashboard · NLQ     │
+                    └─────────────┬───────────────┘
+                                  │
+                                  ▼
+                    ┌─────────────────────────────┐
+                    │   ARC.Host.Functions         │  ← Durable MAF Host
+                    │   Workflow A (ODOS)          │
+                    │   Workflow B (Section 138)   │
+                    └─────────────┬───────────────┘
+                                  │
+          ┌───────────────────────┼───────────────────────┐
+          ▼                       ▼                       ▼
+   ┌─────────────┐        ┌─────────────┐        ┌─────────────┐
+   │  A1..A8     │        │ RequestPort │        │ Service Bus │
+   │  Executors  │        │ 4 Gates     │        │ Fan-out /   │
+   │  ARC.Agents │        │             │        │ Alerts      │
+   └──────┬──────┘        └──────┬──────┘        └─────────────┘
+          │                      │
+          ▼                      ▼
+   ┌─────────────┐        ┌─────────────────────────────┐
+   │  ARC.Tools  │───────▶│  Business Services           │
+   │  (MCP)      │        │  Rules Engine R1–R6          │
+   └─────────────┘        │  LimitationClockService      │
+          │               │  Metric Contracts            │
+          ▼               │  IOutboundGate (Shadow/Live) │
+   ┌─────────────┐        └─────────────┬───────────────┘
+   │ARC.Knowledge│                      │
+   │ Graph/RAG   │                      ▼
+   │ Doc Intel   │        ┌─────────────────────────────┐
+   └─────────────┘        │  ARC.Data                    │
+                          │  Azure SQL · Cosmos · Blob   │
+                          └─────────────┬───────────────┘
+                                        │
+          ┌─────────────────────────────┼─────────────────────────────┐
+          ▼                             ▼                             ▼
+    Azure SQL                      Cosmos DB                      Blob Storage
+    Dealer/Ledger                  Checkpoints/State              Cheques/Notices
+    GateDecision                   Vector/LearnedFacts            Legal WORM
+
+  CROSS-CUTTING:  Entra ID · Key Vault · Azure OpenAI · App Insights / OpenTelemetry</div>
+
+<!-- 3 -->
+<h1 class="sec">3. ODOS Workflow Diagram (Workflow A)</h1>
+<div class="arch">                    SHARED UPSTREAM
+                         ┌──────────┐
+                         │    A1    │  Reconciliation (deterministic)
+                         │ Compute  │
+                         │ Net Exp. │
+                         └────┬─────┘
+                              │ UNRECONCILED? → BLOCK → Finance (terminate)
+                              ▼
+                         ┌──────────┐
+                         │    A2    │  Risk & Prioritisation
+                         └────┬─────┘
+                              │
+              ┌───────────────┼───────────────┐
+              │ Tier=Visit    │ Tier=Notice   │ Tier=Section138
+              ▼               ▼               ▼
+         ┌─────────┐    ┌─────────┐     (routes to A3)
+         │   A6    │    │   A3    │  Notice Decisioning
+         │ Field   │    │ Issue/  │
+         │ (skip   │    │Hold/Rec.│
+         │ paper)  │    └────┬────┘
+         └─────────┘         │
+                    Hold/Reconcile → TERMINATE → Finance (no gate)
+                              │ Issue only
+                              ▼
+                    ┌──────────────────┐
+                    │ gate_depot_manager│  G1 — Depot Manager (RequestPort)
+                    │ Expiry ≠ Approved │
+                    └────────┬─────────┘
+                              ▼
+                         ┌──────────┐
+                         │    A5    │  Drafting & Self-Verification
+                         └────┬─────┘
+                              ▼
+                    ┌──────────────────┐
+                    │gate_advocate_sign│  G2 — Advocate E-Sign (RequestPort)
+                    └────────┬─────────┘
+                              ▼
+                         ┌──────────┐
+                         │    A6    │  Field Orchestration · PTP · Visit Tasks
+                         └──────────┘
+
+  Terminal outputs: WithOutputFrom(A3 terminated, A6 completed)
+  Idempotency key: (cycle_id, dealer_urn, node)
+  Duration: 15+ calendar days (1st → 7th approval → ongoing)</div>
+
+<!-- 4 -->
+<h1 class="sec page-break">4. Section 138 Workflow Diagram (Workflow B)</h1>
+<div class="arch">                    SHARED UPSTREAM
+                         ┌──────────┐
+                         │    A1    │  Reconciliation
+                         └────┬─────┘
+                              │ UNRECONCILED? → BLOCK → Finance
+                              ▼
+                         ┌──────────┐
+                         │    A4    │  Legal Eligibility & Clock
+                         │ R2 + R3  │  CheckSection138Eligibility
+                         │          │  GetLimitationClock
+                         └────┬─────┘
+                              │ Ineligible / Expired → BLOCK
+                              ▼
+                    ┌──────────────────┐
+                    │gate_legal_progress│  G3 — Legal Progression (RequestPort)
+                    └────────┬─────────┘
+                              ▼
+                         ┌──────────┐
+                         │    A5    │  Draft S138 Notice · Self-Verify
+                         └────┬─────┘
+                              ▼
+                    ┌──────────────────┐
+                    │gate_advocate_sign│  G2 — Advocate E-Sign (RequestPort)
+                    └────────┬─────────┘
+                              ▼
+                         ┌──────────┐
+                         │    A7    │  Evidence & Case File Assembly
+                         │Completeness Score │
+                         └────┬─────┘
+                              ▼
+                    ┌──────────────────┐
+                    │gate_legal_case_  │  G4 — Legal Case File Review
+                    │     file_review  │
+                    └────────┬─────────┘
+                              ▼
+                    Filing Readiness → Legal/Court (manual beyond this scope)
+
+  Precondition (business trigger): Demand notice + no payment in 60 days + cheque bounce path
+  Physical courier chain: blocked if ineligible; manual steps remain post-G3</div>
+
+<!-- 5 -->
+<h1 class="sec">5. A1–A8 Agent Architecture</h1>
+<table class="simple">
+  <tr><th>Agent</th><th>Purpose</th><th>Input</th><th>Output</th><th>Deterministic / AI</th><th>Gate</th></tr>
+  <tr><td><strong>A1</strong> Reconciliation</td><td>Net recoverable exposure with lineage</td><td>DealerUrn, AsOf, SAP ledger</td><td>ExposureBreakdown + LineItemRef trail</td><td><strong>100% Deterministic</strong></td><td>None</td></tr>
+  <tr><td><strong>A2</strong> Risk &amp; Prioritisation</td><td>Rank dealers; assign recovery tier</td><td>Exposure, graph features, TSI remarks</td><td>tier ∈ {Visit, Notice, Section138}</td><td>Hybrid — scoring deterministic; LLM reads qualitative remarks</td><td>None</td></tr>
+  <tr><td><strong>A3</strong> Notice Decisioning</td><td>Evidence-backed notice verdict</td><td>RecoveryState + Exposure</td><td>Issue / Hold / Reconcile + citations</td><td><strong>Rules decide</strong>; LLM phrases justification only</td><td>G1 Depot Manager (Issue only)</td></tr>
+  <tr><td><strong>A4</strong> Legal Eligibility &amp; Clock</td><td>S138 eligibility + statutory dates</td><td>ChequeReturnMemo, DemandNotice</td><td>Eligible/blocked + LimitationClock + alerts</td><td><strong>Rules engine decides</strong>; LLM explains only</td><td>G3 Legal</td></tr>
+  <tr><td><strong>A5</strong> Drafting &amp; Verification</td><td>Fill templates; self-verify fields</td><td>Graph facts, templates, return memo</td><td>Draft PDF for e-signature</td><td>Template fill + verification deterministic</td><td>G2 Advocate</td></tr>
+  <tr><td><strong>A6</strong> Field Orchestration</td><td>Visit plans; voice → PTP; chase</td><td>Risk tier, location, voice input</td><td>Visit tasks, PTP records, escalations</td><td>Hybrid — ASR+LLM for voice; TSI confirms low confidence</td><td>TSI confirm (not RequestPort)</td></tr>
+  <tr><td><strong>A7</strong> Evidence &amp; Case File</td><td>Assemble court-ready bundle</td><td>All evidence artefacts</td><td>CaseFile + completeness score</td><td>Mostly deterministic assembly/scoring</td><td>G4 Legal</td></tr>
+  <tr><td><strong>A8</strong> Supervisory Insight</td><td>Exceptions; lever effectiveness; NLQ</td><td>Semantic layer, cycle data</td><td>Exception queue, analytics</td><td>LLM for NLQ; analytics deterministic</td><td>None</td></tr>
+</table>
+<div class="highlight"><strong>Not eight unrestricted autonomous agents.</strong> Each executor has a bounded contract. A1, rules evaluation, clock computation, and A5 self-verification are deterministic. LLM is used for explanation, summarisation, bounded planning, and voice parsing — never for money, dates, or eligibility verdicts.</div>
+<p><strong>Cheque selection (deterministic):</strong> Newest bounced cheque with return memo; else newest on file. Never delegated to the model.</p>
+
+<!-- 6 -->
+<h1 class="sec page-break">6. AI vs Deterministic Responsibility Diagram</h1>
+<div class="arch">                    ARC AGENTIC LAYER (ARC.Agents)
+                           │
+             ┌─────────────┼─────────────┐
+             │             │             │
+         Planning      Reasoning     Explanation
+         (bounded)     (context)     (justification)
+             │             │             │
+             └─────────────┼─────────────┘
+                           ▼
+                     GOVERNED TOOLS (ARC.Tools)
+              ComputeNetExposure · CheckSection138Eligibility
+              GetLimitationClock · SearchDocuments · TraverseGraph
+                           │
+                           ▼
+                DETERMINISTIC SERVICES (ARC.Domain)
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+        Money            Dates          Eligibility
+   Metric Contracts   LimitationClock   Rules R1–R6
+   ComputeNetExposure   Service         Rule Engine
+          │                │                │
+          └────────────────┼────────────────┘
+                           ▼
+              Azure SQL / Cosmos DB / Blob / SAP
+
+  Document Intelligence: schema-validated extraction (confidence-gated) — NOT LLM math
+  Azure AI Speech + LLM: vernacular voice → structured PTP — TSI confirms before commit</div>
+
+<div class="dont-box">
+<strong>LLM DOES NOT:</strong>
+<ul class="compact">
+  <li>Calculate legal amounts</li>
+  <li>Calculate statutory dates</li>
+  <li>Decide Section 138 eligibility</li>
+  <li>Approve notices or legal action</li>
+  <li>Bypass authorization</li>
+  <li>Directly update databases</li>
+  <li>Call SubmitNotice (tool does not exist)</li>
+</ul>
+</div>
+
+<table class="simple">
+  <tr><th>Concern</th><th>Handler</th></tr>
+  <tr><td>Money, dates, eligibility, clocks</td><td>Rules engine + SQL/graph — never LLM</td></tr>
+  <tr><td>Cheque/memo/POD extraction</td><td>Document Intelligence + confidence gates</td></tr>
+  <tr><td>Summarisation, justification, narratives</td><td>LLM (from deterministic outputs only)</td></tr>
+  <tr><td>Planning, routing, tool selection</td><td>LLM supervisor, bounded by tool contract</td></tr>
+  <tr><td>Voice → PTP</td><td>Azure AI Speech + LLM → TSI confirmation</td></tr>
+</table>
+
+<!-- 7 -->
+<h1 class="sec">7. Human-in-the-Loop / Checkpoint Architecture</h1>
+<div class="arch">  MAF Workflow (ARC.Host.Functions)
+       │
+       ▼
+  RequestPort.Create&lt;TRequest, TResponse&gt;("gate_...")
+       │
+       ▼
+  Workflow SUSPENDS ──▶ Publish to approval queue (email/portal/Teams)
+       │
+       ▼
+  SuperStepCompletedEvent → CheckpointId captured
+       │
+       ▼
+  CosmosCheckpointStore (Cosmos DB /checkpoints, partition: cycleId)
+       │  Payload: serialised RecoveryState (JSON)
+       │
+       ▼
+  PROCESS EXITS (days pass — no session affinity)
+       │
+       ▼
+  Different Azure Functions instance (cold start)
+       │
+       ▼
+  ResumeStreamAsync(workflow, checkpointId)
+       │
+       ▼
+  SendResponseAsync(requestId, humanDecision)
+       │
+       ▼
+  Workflow RESUMES → next executor
+
+  Gate Expiry: Approved=false, Reason="gate_expired"  ← NEVER treat expiry as approval</div>
+
+<table class="simple">
+  <tr><th>Gate ID</th><th>Approver</th><th>Trigger</th><th>Checkpoint</th></tr>
+  <tr><td>gate_depot_manager</td><td>Depot Manager</td><td>A3 verdict = Issue</td><td>Cosmos DB</td></tr>
+  <tr><td>gate_advocate_signature</td><td>Advocate</td><td>A5 self-verification pass</td><td>Cosmos DB</td></tr>
+  <tr><td>gate_legal_progression</td><td>Legal Team</td><td>A4 eligibility pass (Workflow B)</td><td>Cosmos DB</td></tr>
+  <tr><td>gate_legal_case_file_review</td><td>Legal Team</td><td>A7 assembly complete</td><td>Cosmos DB</td></tr>
+</table>
+<p><strong>R4:</strong> Agent that recommends cannot approve. <strong>Audit:</strong> GateDecision table (SQL) + Cosmos auditEvents — immutable, 8-year archive.</p>
+<p><strong>In-memory checkpointing is NOT sufficient.</strong> Cycle spans 15+ days; must survive process restart on different instance.</p>
+
+<!-- 8 -->
+<h1 class="sec page-break">8. Data Architecture</h1>
+<h2 class="sub">8.1 Azure SQL — Master / Transactional (Authoritative)</h2>
+<table class="simple">
+  <tr><th>Entity / Table</th><th>Responsibility</th></tr>
+  <tr><td>Dealer</td><td>Resolved identity (DealerUrn), SAP/Portal/App IDs, moratorium (R5), depot/region/TSI</td></tr>
+  <tr><td>LedgerPosition</td><td>Invoices, credit notes, payments, rebates, returns; ageing on DueDate; SourceRowKey (R6)</td></tr>
+  <tr><td>SecurityCheque</td><td>Cheque particulars, status, blob path, extraction confidence</td></tr>
+  <tr><td>ChequeReturnMemo</td><td>Return reason raw/code, memo dates (clock anchor), blob path</td></tr>
+  <tr><td>DemandNotice / Section138Notice</td><td>Notice lifecycle, amounts (from metric contract only)</td></tr>
+  <tr><td>GateDecision</td><td>Immutable human gate audit — actor, role, decision, override, correlation ID</td></tr>
+  <tr><td>FieldVisit / PromiseToPay / Dispute</td><td>Recovery tracking</td></tr>
+</table>
+<p>Pattern: EF Core / Dapper, <strong>read-only by default</strong> for agent queries. Writes via business services only.</p>
+
+<h2 class="sub">8.2 Azure Cosmos DB — Workflow, Semantic, Vector</h2>
+<table class="simple">
+  <tr><th>Container</th><th>Partition Key</th><th>Contents</th><th>TTL</th></tr>
+  <tr><td>checkpoints</td><td>/cycleId</td><td>MAF workflow checkpoints (RecoveryState JSON)</td><td>90 days</td></tr>
+  <tr><td>cycleState</td><td>/cycleId</td><td>Per-dealer run state, terminal outcomes</td><td>None</td></tr>
+  <tr><td>documents</td><td>/documentType</td><td>Chunked policies, notices, agreements + embeddings (3072-dim, cosine, diskANN)</td><td>None</td></tr>
+  <tr><td>learnedFacts</td><td>/scope</td><td>A-Box enrichment with confidence and expiry</td><td>365 days</td></tr>
+  <tr><td>auditEvents</td><td>/cycleId</td><td>Append-only agent/tool event log</td><td>8 years (archive)</td></tr>
+</table>
+
+<h2 class="sub">8.3 Azure Blob Storage — Documents</h2>
+<table class="simple">
+  <tr><th>Content</th><th>Notes</th></tr>
+  <tr><td>Cheque images, return memos, PODs</td><td>Document Intelligence input</td></tr>
+  <tr><td>Demand notices, S138 notices</td><td>A5 output; WORM container</td></tr>
+  <tr><td>Dealer agreements, service proof</td><td>Evidence for A7</td></tr>
+  <tr><td>Legal documents / evidence bundles</td><td><strong>WORM/immutable, 8-year retention</strong></td></tr>
+</table>
+
+<h2 class="sub">8.4 Shared Upstream — A1 Data Flow</h2>
+<div class="arch">  SAP / Portal / Field App
+           │
+           ▼
+      A1 Reconciliation (ComputeNetExposure)
+           │
+           ├──▶ net_recoverable_exposure
+           ├──▶ LineItemRef lineage (R6)
+           │
+           ▼
+      Reconciled? ──NO──▶ UNRECONCILED → Block → Finance
+           │
+          YES
+           ▼
+      A2 / A3 / A4 (downstream workflows)</div>
+
+<!-- 9 -->
+<h1 class="sec">9. Knowledge / RAG Architecture</h1>
+<div class="arch">  Agent / User Query
+       │
+       ▼
+  SearchDocuments / TraverseGraph (ARC.Tools)
+       │
+       ▼
+  Hybrid Retrieval (ARC.Knowledge)
+       ├── Graph Traversal (Dealer 360, evidence links)
+       ├── Keyword Search
+       └── Vector Search (Cosmos diskANN, TOP 8)
+       │
+       ▼
+  Metadata / RBAC Filtering (server-side)
+       │  status=ACTIVE · regionScope · documentCategory
+       ▼
+  Relevant Documents + Provenance
+       │
+       ▼
+  AI Agent (explanation / citation only — NOT financial calc)
+
+  RAG does NOT compute amounts. Citations must resolve to retrievable source (≥0.95 faithfulness target).</div>
+
+<!-- 10 -->
+<h1 class="sec page-break">10. Document Intelligence Architecture</h1>
+<div class="arch">  Cheque / Return Memo / POD (Blob)
+       │
+       ▼
+  Azure AI Document Intelligence (ARC.Knowledge/Extraction)
+       │
+       ▼
+  Structured Extraction (ChequeExtraction schema)
+       │
+       ▼
+  Confidence Check
+  ChequeNumber ≥0.90 · MICR ≥0.90 · Amount ≥0.85
+       │
+       ▼
+      Valid?
+     /      \
+   NO        YES
+   │          │
+   ▼          ▼
+ Flag for    Continue workflow
+ Depot Admin
+   │
+   ▼
+ Extraction ≠ Hand-Keyed Portal Entry?
+       │
+      YES → BLOCK progression → Depot Admin Correction → Re-validation</div>
+
+<!-- 11 -->
+<h1 class="sec">11. Rules Engine Architecture</h1>
+<p>Separate versioned component in <strong>ARC.Domain/Rules</strong>. AI agents invoke rules; they never replace them.</p>
+<table class="simple">
+  <tr><th>Rule</th><th>Description</th><th>Owner</th></tr>
+  <tr><td>R1a</td><td>Hold if unreconciled</td><td>Finance / Rules Engine</td></tr>
+  <tr><td>R1b</td><td>Hold if unapplied_credits / claim_amount &gt; 0.40 (configurable)</td><td>Finance</td></tr>
+  <tr><td>R1c</td><td>Hold if Dispute UNDER_REVIEW or active PTP within grace</td><td>Finance</td></tr>
+  <tr><td>R2</td><td>s138_eligible: enforceable debt + valid presentation + qualifying return code</td><td>Legal</td></tr>
+  <tr><td>R3</td><td>Statutory clock; alerts T-10, T-5, T-2 to named owner</td><td>Legal</td></tr>
+  <tr><td>R4</td><td>Segregation of duties — recommender ≠ approver</td><td>Architecture</td></tr>
+  <tr><td>R5</td><td>Block all action under insolvency moratorium</td><td>Finance / Legal</td></tr>
+  <tr><td>R6</td><td>No notice amount without lineage to source rows</td><td>Finance</td></tr>
+</table>
+<p>Rules: versioned config (JSON), independently unit-testable, fail-closed (throw if prerequisite missing), changeable without prompt edits.</p>
+
+<!-- 12 -->
+<h1 class="sec">12. Limitation Clock Service</h1>
+<div class="arch">  Cheque Return Memo (anchor date — configured, TBC with Legal)
+       │
+       ▼
+  LimitationClockService (ARC.Domain/Clocks) — NOT in AI Agent
+       │
+       ├── NoticeByDate
+       ├── CureWindowEnds (null if notice served date unknown → Warning)
+       ├── FileByDate
+       ├── DaysRemaining
+       └── Status: Healthy | Warning | Critical | Expired
+       │
+       ▼
+  R3 Alerts via Service Bus → T-10 / T-5 / T-2 → Named Legal Owner
+       │
+       ▼
+  Status = Expired → A4 BLOCKS → Escalation (case extinguished — not delayed)
+
+  All dates: DateOnly in IST. Inject TimeProvider — no DateTime.Now in domain.</div>
+
+<!-- 13 -->
+<h1 class="sec page-break">13. Security Architecture</h1>
+<div class="arch">  Microsoft Entra ID
+       │
+       ▼
+  Authentication (humans + managed identity for services)
+       │
+       ▼
+  Authorization — RBAC enforced SERVER-SIDE
+       │  Region/dealer isolation via query predicates — NOT prompts
+       ▼
+  ARC.Api / ARC.Tools / ARC.Data
+       │
+       ├── Key Vault (secrets — no connection strings in config)
+       ├── PII Redaction Middleware (before model calls)
+       └── R4 Segregation of Duties (recommender ≠ approver)</div>
+
+<!-- 14 -->
+<h1 class="sec">14. Observability Architecture</h1>
+<div class="arch">  Application Insights + OpenTelemetry (ARC.Agents/Middleware)
+
+  Span hierarchy:
+    arc.cycle
+      └── arc.dealer
+            ├── arc.executor.A1_Reconciliation
+            ├── arc.tool.compute_net_exposure
+            ├── arc.rules.evaluate { rule.set, rule.id }
+            ├── arc.llm.explain { model, tokens }
+            └── arc.gate.depot_manager { suspended_utc, resumed_utc, wait_hours }
+
+  Custom dimensions (every span):
+    cycle_id · dealer_urn · correlation_id · rule_version
+    · metric_contract_version · prompt_version
+
+  Immutable audit: GateDecision (SQL) + auditEvents (Cosmos)</div>
+
+<table class="simple">
+  <tr><th>Dashboard (pre go-live)</th><th>Purpose</th></tr>
+  <tr><td>Gate wait-time distribution</td><td>HITL SLA monitoring</td></tr>
+  <tr><td>Override rate by depot</td><td>System health (P2 regression detection)</td></tr>
+  <tr><td>R1b block rate by region</td><td>Reconciliation quality</td></tr>
+  <tr><td>Clock status histogram</td><td>Limitation risk</td></tr>
+  <tr><td>Self-verification failure rate</td><td>Draft quality</td></tr>
+</table>
+
+<!-- 15 -->
+<h1 class="sec">15. Messaging Architecture</h1>
+<div class="arch">  ARC Workflow (cycle start)
+       │
+       ▼
+  Azure Service Bus
+       ├── Fan-out: parallel dealer processing (AddFanOutEdge / FanInBarrier)
+       ├── Alerts: limitation T-10/T-5/T-2
+       ├── Notifications: gate approval requests
+       └── Broken-PTP / exception dispatch
+
+  Use fan-out/fan-in only where genuinely required (multi-dealer cycle parallelism).</div>
+
+<!-- 16 -->
+<h1 class="sec page-break">16. Durable Workflow &amp; Shadow Mode</h1>
+<div class="arch">  Azure Functions
+       │
+       ▼
+  Durable MAF Workflow (Microsoft.Agents.AI.Workflows.Durable)
+       │
+       ▼
+  Cosmos DB Checkpoint (externalised — NOT in-memory only)
+       │
+       ▼
+  Human Gate (RequestPort suspend, days/weeks)
+       │
+       ▼
+  Process Restart → Different Instance → Resume from Checkpoint
+
+  RunMode: Shadow | Assisted | Live
+  IOutboundGate adapter: Shadow = compute everything, issue nothing (no notice despatch,
+  no visit task push, no legal transaction). Enforced centrally — not scattered flags.
+
+  Idempotency: (cycle_id, dealer_urn, node) — retries cannot double-issue notice.</div>
+
+<!-- 17 -->
+<h1 class="sec">17. Recommended Solution / Project Structure</h1>
+<div class="arch">ARC.sln
+├── src/
+│   ├── ARC.Domain/           ← Pure domain. NO Azure, MAF, LLM, HTTP.
+│   │   ├── Entities/
+│   │   ├── Metrics/          ← MetricContract, ExposureBreakdown, LineItemRef
+│   │   ├── Rules/            ← IRule, R1a..R6, RuleConfiguration
+│   │   ├── Clocks/           ← LimitationClock, ILimitationClockService
+│   │   └── State/            ← RecoveryState
+│   ├── ARC.Data/
+│   │   ├── Sql/              ← EF Core / Dapper, read-only default
+│   │   ├── Cosmos/           ← Checkpoints, cycleState, vector, auditEvents
+│   │   └── Blob/             ← Documents, WORM SAS
+│   ├── ARC.Knowledge/
+│   │   ├── Graph/
+│   │   ├── Retrieval/
+│   │   └── Extraction/       ← Document Intelligence wrappers
+│   ├── ARC.Tools/
+│   │   ├── ToolRegistry.cs
+│   │   └── Mcp/
+│   ├── ARC.Agents/
+│   │   ├── Executors/        ← A1..A8
+│   │   ├── Workflows/        ← OdosCycleWorkflow, Section138Workflow
+│   │   └── Middleware/       ← PII, correlation, telemetry
+│   ├── ARC.Host.Functions/   ← Durable workflow host
+│   ├── ARC.Api/              ← Gates, dashboards, NLQ endpoints
+│   └── ARC.Cli/              ← Scenario runner S1..S9
+└── tests/
+    ├── ARC.Domain.Tests/     ← Rules + clock (highest value)
+    ├── ARC.Agents.Tests/     ← Workflow topology, checkpoint resume
+    └── ARC.Eval/             ← Golden-set harness (~200 cases)</div>
+
+<!-- 18 -->
+<h1 class="sec">18. Responsibility of Each Project</h1>
+<table class="simple">
+  <tr><th>Project</th><th>Responsibility</th></tr>
+  <tr><td><strong>ARC.Domain</strong></td><td>Entities, metric contracts, rules (R1–R6), limitation clock, RecoveryState, enums, interfaces. Zero infrastructure dependencies.</td></tr>
+  <tr><td><strong>ARC.Data</strong></td><td>Azure SQL repositories, Cosmos checkpoint/store, Blob document repository, GateDecision persistence.</td></tr>
+  <tr><td><strong>ARC.Knowledge</strong></td><td>Knowledge graph traversal, hybrid retrieval (graph + keyword + vector), Document Intelligence extraction wrappers.</td></tr>
+  <tr><td><strong>ARC.Tools</strong></td><td>Governed AI tool surface: ComputeNetExposure, CheckSection138Eligibility, GetLimitationClock, SearchDocuments, TraverseGraph. MCP server.</td></tr>
+  <tr><td><strong>ARC.Agents</strong></td><td>MAF executors A1–A8, Workflow A/B graphs, RequestPort gates, middleware (PII, OTel), IOutboundGate.</td></tr>
+  <tr><td><strong>ARC.Host.Functions</strong></td><td>Azure Functions durable host binding, cycle triggers, Service Bus consumers, checkpoint resume.</td></tr>
+  <tr><td><strong>ARC.Api</strong></td><td>External API — human gate responses, dashboards, NLQ (A8), health. Container Apps.</td></tr>
+  <tr><td><strong>ARC.Cli</strong></td><td>Local scenario execution S1–S9, shadow mode runs, demo harness.</td></tr>
+  <tr><td><strong>ARC.Domain.Tests</strong></td><td>Rules R1–R6, limitation clock edge cases, metric contract lineage.</td></tr>
+  <tr><td><strong>ARC.Agents.Tests</strong></td><td>Workflow wiring, conditional edges, gate suspend/resume, idempotency.</td></tr>
+  <tr><td><strong>ARC.Eval</strong></td><td>Golden-set evaluation (~200 labelled cases), acceptance metric targets.</td></tr>
+</table>
+
+<!-- 19 -->
+<h1 class="sec page-break">19. Dependency Flow</h1>
+<div class="arch">                    ARC.Host.Functions
+                           │
+              ┌────────────┼────────────┐
+              ▼            ▼            ▼
+          ARC.Api      ARC.Agents    ARC.Cli
+                           │
+              ┌────────────┼────────────┐
+              ▼            ▼            ▼
+         ARC.Tools   ARC.Knowledge   (via Tools)
+              │            │
+              └────────────┼────────────┘
+                           ▼
+                       ARC.Data
+                           │
+                           ▼
+                       ARC.Domain   ← MUST NOT depend on Azure / MAF / LLM / HTTP
+
+  Dependency rule: ARC.Domain references nothing external.
+  If a rule or clock needs HttpClient, the design is wrong.</div>
+
+<!-- 20 -->
+<h1 class="sec">20. End-to-End Request / Workflow Flow</h1>
+<div class="arch">  [Day 1] Portal cycle trigger (1st of month)
+       │
+       ▼
+  Service Bus fan-out → per-dealer workflow instances
+       │
+       ▼
+  A1 ComputeNetExposure → ExposureBreakdown
+       │
+       ▼
+  A2 RiskAssessment → tier
+       │
+       ├── Visit → A6 (field tasks queued via IOutboundGate if Live)
+       └── Notice → A3 → Rules R1/R5 → NoticeVerdict
+              │
+              ├── Hold/Reconcile → terminate → Finance queue
+              └── Issue → gate_depot_manager SUSPEND → checkpoint Cosmos
+       │
+  [Day 1–7] Depot Manager approves via ARC.Api → resume checkpoint
+       │
+       ▼
+  A5 draft → self-verify → gate_advocate_signature SUSPEND
+       │
+       ▼
+  Advocate e-signs → A6 field orchestration
+       │
+  [60 days no payment] → Workflow B entry
+       │
+       ▼
+  A4 eligibility + clock → gate_legal_progression → A5 → G2 → A7 → G4
+       │
+       ▼
+  Case file ready for filing (court steps manual/out of scope)</div>
+
+<!-- 21 -->
+<h1 class="sec">21. Architecture Decisions</h1>
+<table class="simple">
+  <tr><th>Decision</th><th>Rationale (Source)</th></tr>
+  <tr><td>MAF WorkflowBuilder graphs, not chat loops</td><td>Multi-day durable process with explicit gates</td></tr>
+  <tr><td>Eight bounded executors (A1–A8), not one giant agent</td><td>Deterministic/probabilistic separation per sub-problem SP1–SP9</td></tr>
+  <tr><td>Rules in ARC.Domain as versioned code, not prompts</td><td>R1–R6 must be independently testable; Legal/Finance owned</td></tr>
+  <tr><td>LimitationClockService separate from A4 LLM</td><td>Zero statutory misses; dates never from model</td></tr>
+  <tr><td>Cosmos DB external checkpoint store</td><td>15+ day cycles; resume on different instance</td></tr>
+  <tr><td>No SubmitNotice tool</td><td>Notices emitted by workflow post-gate, not model tool call</td></tr>
+  <tr><td>IOutboundGate for Shadow/Live</td><td>Central enforcement — compute everything, issue nothing in shadow</td></tr>
+  <tr><td>ARC.Domain has zero infra deps</td><td>Testability; rules/clock pure logic</td></tr>
+  <tr><td>Read-only SQL default</td><td>Agents query; business services write</td></tr>
+  <tr><td>MCP + AIFunction dual exposure</td><td>Same governed contracts for agents and external clients</td></tr>
+  <tr><td>Service Bus fan-out for dealer parallelism</td><td>~2,500 dealers per cycle; parallel scoring/extraction</td></tr>
+  <tr><td>Fail-closed everywhere</td><td>Missing prerequisite → block, never default Pass</td></tr>
+</table>
+
+<!-- 22 -->
+<h1 class="sec page-break">22. Items Explicitly Required by Source Document</h1>
+<ul class="compact">
+  <li>Two MAF workflows (A: ODOS, B: Section 138) sharing A1 upstream</li>
+  <li>Four RequestPort HITL gates with Cosmos checkpointing; expiry ≠ approval</li>
+  <li>Eight executors A1–A8 with decomposition as specified</li>
+  <li>Rules R1–R6 versioned, fail-closed, unit-testable</li>
+  <li>LimitationClockService with T-10/T-5/T-2 alerts to named owner</li>
+  <li>Five governed tools (no SubmitNotice)</li>
+  <li>Metric contract net_recoverable_exposure with R6 LineItemRef lineage</li>
+  <li>Document Intelligence with confidence thresholds (0.90/0.90/0.85)</li>
+  <li>Hybrid retrieval: graph + keyword + vector (Cosmos diskANN)</li>
+  <li>Shadow / Assisted / Live run modes via IOutboundGate</li>
+  <li>Idempotency key (cycle_id, dealer_urn, node)</li>
+  <li>GateDecision immutable audit + Cosmos auditEvents (8-year)</li>
+  <li>PII redaction middleware before model calls</li>
+  <li>RBAC server-side — TSI cannot read other regions</li>
+  <li>OpenTelemetry spans with cycle_id, dealer_urn, correlation_id, rule_version, prompt_version</li>
+  <li>Demo scenarios S1–S9 and golden-set evaluation targets</li>
+  <li>Solution structure ARC.sln with 8 src + 3 test projects as specified</li>
+  <li>WORM Blob 8-year retention for legal artefacts</li>
+  <li>SP1–SP3 upstream sequencing; A1 shadow before live notice influence</li>
+</ul>
+
+<!-- 23 -->
+<h1 class="sec">23. To Be Confirmed (Source Does Not Fully Define)</h1>
+<div class="tbc">
+<table class="simple">
+  <tr><th>Item</th><th>Notes</th></tr>
+  <tr><td>Exact statutory periods (NI Act windows)</td><td>Confirm with Legal counsel; hold as versioned config (illustrative 30/15/30 in source)</td></tr>
+  <tr><td>Clock anchor: memo received vs issue date</td><td>Configured anchor — must be explicit</td></tr>
+  <tr><td>Second bounce — which dishonour anchors clock</td><td>Policy decision required</td></tr>
+  <tr><td>Notice-by on Sunday/gazetted holiday</td><td>Behaviour must be documented</td></tr>
+  <tr><td>R1b denominator (claim_amount vs gross_open_AR)</td><td>Reconcile rule text with implementation</td></tr>
+  <tr><td>R1c PTP grace period duration</td><td>Not numerically specified</td></tr>
+  <tr><td>A2 scoring model / tier thresholds</td><td>Tier enum defined; boundaries TBC</td></tr>
+  <tr><td>ASR hard-floor discard threshold</td><td>S7 uses 0.72 for confirmation tier only</td></tr>
+  <tr><td>15th timeline freeze mapping to agent workflow</td><td>In current Process B; not in MAF topology</td></tr>
+  <tr><td>Arrest warrant / court proceeding automation</td><td>Portal column exists; no agent beyond filing readiness</td></tr>
+  <tr><td>Physical courier chain automation</td><td>Manual steps remain; system blocks ineligible pre-courier</td></tr>
+  <tr><td>Hold vs Reconcile termination semantics</td><td>Both terminate without G1; clarify routing difference</td></tr>
+  <tr><td>MAF API namespace stability</td><td>Verify against current MAF 1.0 GA docs</td></tr>
+</table>
+</div>
+
+<div class="end">— End of Document —<br>ARC Solution Architecture Document v1.0 | 28-Aug-2026<br>No implementation code — architecture only</div>
+
+</body>
+</html>

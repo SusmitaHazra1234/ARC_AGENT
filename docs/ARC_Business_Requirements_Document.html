@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ARC — Agentic Receivables Recovery and Section 138 Legal Action Pipeline — BRD v2.0</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm 16mm 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 10pt; line-height: 1.35; color: #1a1a1a; margin: 0; padding: 0 4px; }
+  .cover { page-break-after: always; padding: 40px 18px 32px; }
+  .cover h1 { font-size: 19pt; color: #1f3864; margin: 0 0 4px; }
+  .cover h2 { font-size: 12.5pt; color: #2e5090; font-weight: 600; margin: 0 0 18px; line-height: 1.35; }
+  .cover-table th { background: #1f3864; color: #fff; width: 34%; }
+  .principle-box { background: #f0f4fa; border: 1px solid #c5cfe0; padding: 12px 16px; margin: 16px 0 8px; font-size: 10pt; max-width: 700px; }
+  h1.sec { font-size: 13.5pt; color: #fff; background: #1f3864; padding: 7px 12px; margin: 18px 0 8px; page-break-after: avoid; }
+  h2.sub { font-size: 11pt; color: #2e5090; margin: 12px 0 6px; page-break-after: avoid; }
+  p { margin: 5px 0 8px; }
+  ul.compact { margin: 5px 0; padding-left: 18px; }
+  ul.compact li { margin-bottom: 2px; }
+  table.simple { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.5pt; }
+  table.simple th { background: #2e5090; color: #fff; padding: 5px 8px; text-align: left; border: 1px solid #2e5090; }
+  table.simple td { border: 1px solid #ccc; padding: 5px 8px; vertical-align: top; }
+  .page-break { page-break-before: always; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; font-size: 8.5pt; }
+  .legend span { padding: 2px 8px; border-radius: 3px; font-weight: 600; }
+  .leg-user { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+  .leg-ai { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+  .leg-sys { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+  .leg-human { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .leg-legal { background: #fce7f3; color: #9d174d; border: 1px solid #f9a8d4; }
+  .leg-db { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+  .flow { display: flex; flex-direction: column; align-items: center; margin: 10px 0 14px; page-break-inside: avoid; }
+  .flow-title { font-size: 9pt; font-weight: 700; color: #2e5090; margin-bottom: 6px; text-align: center; }
+  .box { padding: 7px 12px; border-radius: 4px; text-align: center; font-size: 9pt; font-weight: 600; min-width: 180px; max-width: 320px; border: 2px solid; }
+  .box-user { background: #dbeafe; border-color: #3b82f6; color: #1e40af; }
+  .box-ai { background: #ede9fe; border-color: #8b5cf6; color: #5b21b6; }
+  .box-sys { background: #ffedd5; border-color: #f97316; color: #9a3412; }
+  .box-human { background: #fef3c7; border-color: #eab308; color: #854d0e; }
+  .box-legal { background: #fce7f3; border-color: #ec4899; color: #9d174d; }
+  .box-db { background: #f3f4f6; border-color: #6b7280; color: #374151; }
+  .box-start { background: #dcfce7; border-color: #22c55e; color: #166534; }
+  .box-end { background: #e0e7ff; border-color: #6366f1; color: #3730a3; }
+  .box-decision { background: #fef9c3; border-color: #eab308; color: #854d0e; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); padding: 16px 20px; min-width: 120px; font-size: 8.5pt; }
+  .arrow { font-size: 14pt; color: #555; padding: 1px 0; text-align: center; line-height: 1; }
+  .branch { display: flex; justify-content: center; gap: 28px; width: 100%; margin: 3px 0; }
+  .branch-col { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 240px; }
+  .branch-label { font-size: 8.5pt; font-weight: 700; margin-bottom: 3px; }
+  .branch-label.no { color: #dc2626; }
+  .branch-label.yes { color: #16a34a; }
+  .arch { font-family: Consolas, monospace; font-size: 8pt; background: #f8f9fb; border: 1px solid #d0d7e2; padding: 12px; margin: 8px 0; white-space: pre; line-height: 1.3; page-break-inside: avoid; }
+  .highlight { background: #fef2f2; border-left: 4px solid #dc2626; padding: 8px 12px; margin: 8px 0; font-size: 9.5pt; }
+  .tbc { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 8px 12px; margin: 8px 0; font-size: 9.5pt; }
+  .do-dont { display: flex; gap: 12px; margin: 8px 0; page-break-inside: avoid; }
+  .do-dont div { flex: 1; padding: 8px 10px; border-radius: 4px; font-size: 9pt; }
+  .do { background: #f0fdf4; border: 1px solid #86efac; }
+  .dont { background: #fef2f2; border: 1px solid #fca5a5; }
+  .do-dont ul { margin: 3px 0 0; padding-left: 16px; }
+  .summary-box { background: #f0f4fa; border: 2px solid #2e5090; padding: 12px 16px; margin: 12px 0; font-size: 9.5pt; }
+  .end { text-align: center; font-weight: bold; color: #1f3864; margin-top: 24px; padding: 16px; }
+  .check { color: #16a34a; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <h1>Business Requirements Document</h1>
+  <h2>ARC — Agentic Receivables Recovery and<br>Section 138 Legal Action Pipeline</h2>
+  <table class="simple cover-table" style="max-width:680px;">
+    <tr><th>Attribute</th><th>Value</th></tr>
+    <tr><td>Solution</td><td>ARC — Agentic Receivables Recovery and Section 138 Legal Action Pipeline</td></tr>
+    <tr><td>Client Context</td><td>PaintCo — decorative paints manufacturer, ~2,900 dealers, regional depots, TSIs</td></tr>
+    <tr><td>Primary Reference</td><td>Problem_Statement_1_Receivables_Recovery_Section138 (Organization-approved)</td></tr>
+    <tr><td>Version</td><td>2.0</td></tr>
+    <tr><td>Date</td><td>28-Aug-2026</td></tr>
+    <tr><td>Status</td><td>Draft for Business &amp; Technical Review</td></tr>
+  </table>
+  <div class="principle-box">
+    <strong>Core principle:</strong> ARC is agentic in orchestration and recommendation — but deterministic in validation, authorization, money, dates, eligibility and legal persistence. The AI never computes an amount, date or eligibility verdict that appears in a legal notice. All such values come from the rules engine and metric contracts.
+  </div>
+  <p style="font-size:9.5pt;color:#555;">This BRD is a visual implementation guide. Read the flowcharts first.</p>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="leg-user">BUSINESS USER / TSI</span>
+  <span class="leg-ai">AI AGENT</span>
+  <span class="leg-sys">BACKEND / RULES</span>
+  <span class="leg-human">HUMAN APPROVER</span>
+  <span class="leg-legal">LEGAL TEAM</span>
+  <span class="leg-db">DATABASE / ERP</span>
+</div>
+
+<!-- 1 -->
+<h1 class="sec">1. Document Information</h1>
+<table class="simple">
+  <tr><th>Item</th><th>Details</th></tr>
+  <tr><td>Document Owner</td><td>Business Process Owner — Receivables Recovery &amp; Legal Action</td></tr>
+  <tr><td>Solution Owner</td><td>ARC Solution Team</td></tr>
+  <tr><td>Reviewers</td><td>Finance, Legal, Depot Operations, Field Sales, IT Architecture, Security</td></tr>
+  <tr><td>Source of Truth</td><td>Problem Statement 1 — Agentic Receivables Recovery and Section 138 Pipeline</td></tr>
+</table>
+<h2 class="sub">1.1 Version History</h2>
+<table class="simple">
+  <tr><th>Ver</th><th>Date</th><th>Change</th></tr>
+  <tr><td>1.0</td><td>28-Aug-2026</td><td>Initial BRD from Problem Statement</td></tr>
+  <tr><td>2.0</td><td>28-Aug-2026</td><td>Visual rewrite — 10 flowcharts, AI vs backend table, tools, TBC items; theory reduced</td></tr>
+</table>
+
+<!-- 2 -->
+<h1 class="sec">2. Executive Summary — What Is ARC?</h1>
+<p><strong>ARC</strong> closes the gap between automated legal paper production and actual money recovery for PaintCo dealer receivables.</p>
+<table class="simple">
+  <tr><th>Question</th><th>Answer</th></tr>
+  <tr><td>What is ARC?</td><td>A human-gated, multi-day workflow system with eight AI agents (A1–A8) that reconcile receivables, prioritise recovery, recommend notices, orchestrate field visits, guard Section 138 eligibility, draft legal documents, and assemble court-ready case files.</td></tr>
+  <tr><td>What problem?</td><td>2,526 notices / ₹193.42 Cr chased in one month — but only 1 dealer visited, 0 rejections, unreconciled AR, manual S138 chain, no statutory clocks.</td></tr>
+  <tr><td>Two workflows</td><td><strong>Workflow A</strong> — Monthly ODOS demand-notice cycle. <strong>Workflow B</strong> — Section 138 legal pipeline after 60 days non-payment and cheque bounce.</td></tr>
+  <tr><td>Who uses it?</td><td>Depot Manager, TSI, Depot Admin, ASM/HO, Legal, Advocate, Finance Controller</td></tr>
+  <tr><td>What AI does</td><td>Analyses, prioritises, recommends, drafts, orchestrates — via governed tools. Does not approve or compute legal amounts.</td></tr>
+  <tr><td>What humans do</td><td>Approve notices (G1), e-sign (G2), approve legal progression (G3), review case file (G4), confirm field PTP, correct cheque data</td></tr>
+</table>
+
+<!-- 3 -->
+<h1 class="sec page-break">3. Problem Statement</h1>
+<table class="simple">
+  <tr><th>ID</th><th>Problem</th><th>Live Impact</th></tr>
+  <tr><td>P1</td><td>Single hard trigger (ageing &gt; 90 days AND balance &gt; ₹5,000) — no recoverability ranking</td><td>2,526 notices vs capacity for ~few hundred visits/month</td></tr>
+  <tr><td>P2</td><td>Approval is timeout, not judgement — default Yes, 0 declines</td><td>Rubber-stamp gate</td></tr>
+  <tr><td>P3</td><td>Gross AR never reconciled — credits, rebates, returns, clearing cheques ignored</td><td>Wrongful notices; legal exposure</td></tr>
+  <tr><td>P4</td><td>Execution gap — 2,525 of 2,526 dealers never visited; ASM/HO remarks empty</td><td>Cannot tell "refused" from "nobody asked"</td></tr>
+  <tr><td>P5</td><td>S138 manual physical chain; statutory clocks in advocate's diary</td><td>Missed date extinguishes case</td></tr>
+  <tr><td>P6</td><td>Context fragmented across SAP, portal, PDFs, images, free-text</td><td>Inconsistent decisions</td></tr>
+  <tr><td>P7</td><td>No learning loop — same letter every month</td><td>Notices become noise</td></tr>
+</table>
+
+<!-- 4 -->
+<h1 class="sec">4. ARC Objective</h1>
+<table class="simple">
+  <tr><th>#</th><th>Objective</th></tr>
+  <tr><td>1</td><td>Convert open-loop notice generation into closed-loop receivables recovery</td></tr>
+  <tr><td>2</td><td>Reconcile gross AR → net recoverable exposure before any action</td></tr>
+  <tr><td>3</td><td>Prioritise dealers by recoverability — not uniform treatment</td></tr>
+  <tr><td>4</td><td>Replace default-Yes with evidence-backed Issue / Hold / Reconcile</td></tr>
+  <tr><td>5</td><td>Instrument field follow-up — visit plans, Promise-to-Pay, broken-PTP chase</td></tr>
+  <tr><td>6</td><td>Guard S138 with eligibility checks and statutory limitation clocks</td></tr>
+  <tr><td>7</td><td>Assemble court-ready evidence bundles before filing</td></tr>
+  <tr><td>8</td><td>Measure which recovery lever actually works</td></tr>
+</table>
+
+<!-- 5 -->
+<h1 class="sec page-break">5. Current Business Process</h1>
+<h2 class="sub">5.1 Process A — Monthly ODOS Demand-Notice Cycle (Today)</h2>
+<table class="simple">
+  <tr><th>Step</th><th>Who</th><th>What Happens</th></tr>
+  <tr><td>1</td><td>Portal</td><td>1st — List dealers: ageing &gt; 90 days AND balance &gt; ₹5,000</td></tr>
+  <tr><td>2</td><td>Portal</td><td>1st — Bulk email to Depot Managers for dealer-by-dealer confirmation</td></tr>
+  <tr><td>3</td><td>Depot Manager</td><td>1st–7th — Approve (default Yes) or Decline with reason</td></tr>
+  <tr><td>4</td><td>HO Legal</td><td>After 7th — Generate notices with advocate signature; despatch</td></tr>
+  <tr><td>5</td><td>Field App</td><td>After 7th — Notice shown to covering TSI</td></tr>
+  <tr><td>6</td><td>TSI</td><td>Ongoing — Visit dealer; record feedback and recovery plan</td></tr>
+  <tr><td>7</td><td>System</td><td>Monthly — Cycle repeats for uncleared dealers</td></tr>
+</table>
+<h2 class="sub">5.2 Process B — Section 138 Escalation (Today)</h2>
+<table class="simple">
+  <tr><th>Step</th><th>Who</th><th>What Happens</th></tr>
+  <tr><td>1</td><td>Portal</td><td>List dealers: demand notice sent + no payment in 60 days</td></tr>
+  <tr><td>2</td><td>Depot Admin</td><td>Key cheque particulars; upload scan</td></tr>
+  <tr><td>3</td><td>Portal</td><td>Timeline freeze on 15th</td></tr>
+  <tr><td>4</td><td>Portal</td><td>Realised → close. Bounced → proceed</td></tr>
+  <tr><td>5</td><td>Depot Admin</td><td>Courier cheques to HO; key POD numbers</td></tr>
+  <tr><td>6</td><td>HO</td><td>Re-deposit cheques at single branch</td></tr>
+  <tr><td>7</td><td>Legal / PIS</td><td>Manually update bounce/realisation status</td></tr>
+  <tr><td>8</td><td>Legal</td><td>Draft Section 138 notice; upload per dealer</td></tr>
+  <tr><td>9</td><td>TSI / Court</td><td>Inform dealer; court summons; arrest warrant tracking <em>(manual, portal column exists)</em></td></tr>
+</table>
+
+<!-- 6 -->
+<h1 class="sec">6. Proposed ARC Solution</h1>
+<p>ARC addresses nine sub-problems (SP1–SP9) through eight agents, two workflows, four human gates, and a deterministic rules engine — in Shadow, Assisted, or Live mode.</p>
+<table class="simple">
+  <tr><th>Sub-Problem</th><th>ARC Capability</th><th>Agent</th></tr>
+  <tr><td>SP1 Ledger reconciliation</td><td>Net recoverable exposure + line-item audit trail</td><td>A1</td></tr>
+  <tr><td>SP2 Entity resolution / Dealer 360</td><td>One dealer across SAP, portal, app, cheque, agreement</td><td>A1 + Knowledge</td></tr>
+  <tr><td>SP3 Recoverability scoring</td><td>Ranked worklist; top-decile in seconds</td><td>A2</td></tr>
+  <tr><td>SP4 Notice decisioning</td><td>Issue / Hold / Reconcile with cited evidence</td><td>A3</td></tr>
+  <tr><td>SP5 S138 eligibility</td><td>Validate debt, presentation, return reason before physical chain</td><td>A4</td></tr>
+  <tr><td>SP6 Limitation clock &amp; drafting</td><td>Statutory dates; draft from graph facts only</td><td>A4 + A5</td></tr>
+  <tr><td>SP7 Field orchestration &amp; PTP</td><td>Geo-clustered visits; voice → structured Promise-to-Pay</td><td>A6</td></tr>
+  <tr><td>SP8 Evidence assembly</td><td>Court-ready bundle + completeness score</td><td>A7</td></tr>
+  <tr><td>SP9 Supervision &amp; learning</td><td>ASM/HO exceptions; lever effectiveness</td><td>A8</td></tr>
+</table>
+<div class="highlight"><strong>Sequencing:</strong> SP1–SP3 are upstream of everything. A1 must run in shadow mode before any agent influences a live notice.</div>
+
+<!-- 7 -->
+<h1 class="sec page-break">7. Scope</h1>
+<h2 class="sub">7.1 In Scope</h2>
+<ul class="compact">
+  <li>Reconciliation, entity resolution, recoverability scoring, notice decisioning</li>
+  <li>Four HITL gates (Depot Manager, Advocate, Legal ×2)</li>
+  <li>S138 eligibility, limitation clocks, notice drafting, evidence assembly</li>
+  <li>Field visit orchestration, PTP capture, broken-PTP escalation</li>
+  <li>Shadow / Assisted / Live modes; durable multi-day workflows</li>
+</ul>
+<h2 class="sub">7.2 Out of Scope</h2>
+<ul class="compact">
+  <li>Replacement of SAP / core ERP</li>
+  <li>Court filing execution, hearings, arrest warrant automation <em>(portal tracks; no agent defined)</em></li>
+  <li>Payment collection / banking transactions</li>
+  <li>Autonomous legal action without human gates</li>
+</ul>
+
+<!-- 8 -->
+<h1 class="sec">8. Actors / Users</h1>
+<table class="simple">
+  <tr><th>Actor</th><th>Role in ARC</th></tr>
+  <tr><td>Depot Manager</td><td>Review evidence-backed recommendation; approve/decline/override (G1)</td></tr>
+  <tr><td>Depot Admin</td><td>Key cheque data; correct extraction mismatches; courier/POD</td></tr>
+  <tr><td>TSI</td><td>Execute visit tasks; confirm voice-captured PTP</td></tr>
+  <tr><td>ASM / HO Supervisor</td><td>Review exception queue (A8)</td></tr>
+  <tr><td>HO Legal / PIS</td><td>Eligibility review; legal progression (G3); case file review (G4)</td></tr>
+  <tr><td>Advocate</td><td>E-sign verified draft (G2); court proceedings</td></tr>
+  <tr><td>Finance Controller</td><td>Rule configuration; Reconcile-routed cases</td></tr>
+  <tr><td>Dealer (Debtor)</td><td>Receives notices; may pay, dispute or ignore — not a system user</td></tr>
+  <tr><td>AI Agents A1–A8</td><td>Reconcile, score, recommend, orchestrate, draft, assemble evidence</td></tr>
+  <tr><td>Backend / Rules Engine</td><td>Validation, amounts, dates, eligibility, persistence, authorization</td></tr>
+</table>
+
+<!-- 9 FLOWCHART 1 -->
+<h1 class="sec page-break">9. ARC End-to-End Business Flow</h1>
+<div class="flow-title">FLOWCHART 1 — Complete ARC Flow (Workflow A + B entry)</div>
+<div class="flow">
+  <div class="box box-start">START — Dealer Receivable / Invoice Due</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Payment Received?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-sys">Close / Update Ledger</div></div>
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-db">Receivable Overdue (&gt;90d, &gt;₹5,000)</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">ARC — Monthly Cycle Identifies Eligible Dealer</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A1 Reconcile → Net Recoverable Exposure</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Reconciled?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">UNRECONCILED → Finance</div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-ai">A2 Prioritise → Tier: Visit / Notice / S138</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Recovery Tier?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">VISIT</div><div class="box box-ai">A6 Field Visit Plan (skip paper)</div></div>
+    <div class="branch-col"><div class="branch-label yes">NOTICE</div><div class="box box-ai">A3 → Issue / Hold / Reconcile</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-human">G1 — Depot Manager Approval</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A5 Draft Notice → G2 Advocate E-Sign → Despatch</div>
+  <div class="arrow">↓</div>
+  <div class="box box-user">A6 — TSI Visit + PTP Capture</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Payment Received?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-end">Close Case</div></div>
+    <div class="branch-col"><div class="branch-label no">NO — 60 days</div><div class="box box-db">Workflow B — Cheque Deposit / Bounce</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A4 S138 Eligibility + Clock → G3 Legal → A5 → G2 → A7 → G4</div>
+  <div class="arrow">↓</div>
+  <div class="box box-legal">Legal Process / Court Tracking → Case Closure</div>
+  <div class="arrow">↓</div>
+  <div class="box box-end">END</div>
+</div>
+
+<table class="simple">
+  <tr><th>Step</th><th>Who</th><th>What Happens</th><th>System</th></tr>
+  <tr><td>1</td><td>ERP / Portal</td><td>Receivable ages past 90 days, balance &gt; ₹5,000</td><td>SAP / Portal</td></tr>
+  <tr><td>2</td><td>Backend</td><td>Trigger monthly ODOS cycle</td><td>ARC Workflow A</td></tr>
+  <tr><td>3</td><td>A1</td><td>Compute net recoverable exposure</td><td>ComputeNetExposure tool</td></tr>
+  <tr><td>4</td><td>A2</td><td>Assign recovery tier</td><td>Rules + scoring</td></tr>
+  <tr><td>5</td><td>A3</td><td>Recommend Issue / Hold / Reconcile</td><td>SearchDocuments, TraverseGraph</td></tr>
+  <tr><td>6</td><td>Depot Manager</td><td>Approve or decline notice</td><td>Gate G1</td></tr>
+  <tr><td>7</td><td>A5 + Advocate</td><td>Draft and e-sign notice</td><td>Gates G2</td></tr>
+  <tr><td>8</td><td>TSI</td><td>Field visit and PTP</td><td>A6 + Field App</td></tr>
+  <tr><td>9</td><td>System</td><td>60 days no payment → S138 pipeline</td><td>Workflow B</td></tr>
+  <tr><td>10</td><td>Legal</td><td>Review eligibility, case file, filing readiness</td><td>Gates G3, G4</td></tr>
+</table>
+
+<!-- 10 FLOWCHART 2 -->
+<h1 class="sec page-break">10. AI Agent Role</h1>
+<div class="flow-title">FLOWCHART 2 — What the AI Agent Does (Per Case Event)</div>
+<div class="flow">
+  <div class="box box-user">Business Event (Cycle Start / Dealer Case / Field Input)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">ARC Application Receives Event</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">AI Agent (A1–A8) Activated</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">Understand Case Context</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Need More Information?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-ai">Call Retrieval Tool (SearchDocuments / TraverseGraph)</div></div>
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-ai">Select Appropriate Tool</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">Tool Call → Backend Service</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">Business Validation + Rules Engine</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">Result (Amounts / Dates / Eligibility from Rules — NOT LLM)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">Agent Recommends Next Action + Justification</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Human Gate Required?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-human">Suspend → Human Review</div></div>
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">Continue Workflow</div></div>
+  </div>
+</div>
+
+<h2 class="sub">10.1 Agent Decomposition (A1–A8)</h2>
+<table class="simple">
+  <tr><th>Agent</th><th>Does</th><th>Output</th><th>Gate</th></tr>
+  <tr><td>A1 Reconciliation</td><td>Deterministic netting</td><td>net_recoverable_exposure + lineage</td><td>Auto</td></tr>
+  <tr><td>A2 Risk &amp; Prioritisation</td><td>Scoring + graph features</td><td>Tier: Visit / Notice / Section138</td><td>Auto</td></tr>
+  <tr><td>A3 Notice Decisioning</td><td>Rules R1/R5 + evidence</td><td>Issue / Hold / Reconcile + citations</td><td>G1 Depot Manager</td></tr>
+  <tr><td>A4 Legal Eligibility &amp; Clock</td><td>Rules R2/R3; LLM explains only</td><td>Eligible/blocked + file_by_date</td><td>G3 Legal</td></tr>
+  <tr><td>A5 Drafting</td><td>Template fill from graph facts; self-verify</td><td>Notice PDF</td><td>G2 Advocate</td></tr>
+  <tr><td>A6 Field Orchestration</td><td>Visit plans; voice → PTP</td><td>Visit tasks, PTP records</td><td>TSI confirm</td></tr>
+  <tr><td>A7 Evidence &amp; Case File</td><td>Bundle assembly + completeness</td><td>Court-ready bundle</td><td>G4 Legal</td></tr>
+  <tr><td>A8 Supervisory Insight</td><td>Exception queue; lever analytics</td><td>ASM/HO exceptions</td><td>Auto</td></tr>
+</table>
+
+<h2 class="sub">10.2 Information the AI Agent Needs</h2>
+<table class="simple">
+  <tr><th>Data</th><th>Source</th><th>Used By</th></tr>
+  <tr><td>Gross AR, credit notes, rebates, returns, clearing cheques</td><td>SAP / Azure SQL</td><td>A1</td></tr>
+  <tr><td>Dealer identity across systems</td><td>SAP, Portal, Field App, Agreement</td><td>A1, A2</td></tr>
+  <tr><td>Payment history, ageing, dispute state</td><td>Ledger + Portal</td><td>A2, A3</td></tr>
+  <tr><td>Dealer agreement, prior notices, delivery proof</td><td>Blob / Vector store</td><td>A3, A7</td></tr>
+  <tr><td>Security cheque image, return memo</td><td>Blob + Document Intelligence</td><td>A4, A5, A7</td></tr>
+  <tr><td>TSI field remarks, visit history</td><td>Field App / Cosmos DB</td><td>A2, A6, A8</td></tr>
+  <tr><td>Statutory clock anchors</td><td>Rules engine (R3)</td><td>A4</td></tr>
+</table>
+
+<h2 class="sub">10.3 Tools the AI Agent Calls</h2>
+<table class="simple">
+  <tr><th>Tool</th><th>Purpose</th><th>Used By</th></tr>
+  <tr><td><strong>ComputeNetExposure</strong></td><td>Net recoverable exposure with deduction breakdown and source lineage. <em>Only authoritative source of claim amount.</em></td><td>A1, others needing exposure</td></tr>
+  <tr><td><strong>CheckSection138Eligibility</strong></td><td>S138 eligibility per rules R2</td><td>A4</td></tr>
+  <tr><td><strong>GetLimitationClock</strong></td><td>Statutory dates and days remaining</td><td>A4</td></tr>
+  <tr><td><strong>SearchDocuments</strong></td><td>Hybrid search over policies, notices, agreements</td><td>A3, A8</td></tr>
+  <tr><td><strong>TraverseGraph</strong></td><td>Knowledge graph traversal (Dealer 360)</td><td>A2, A3, A4, A7</td></tr>
+</table>
+<div class="highlight"><strong>No SubmitNotice tool.</strong> Notices are emitted by the workflow after human gate approval — not by the model calling a function.</div>
+
+<h2 class="sub">10.4 AI Agent vs Backend vs Human</h2>
+<table class="simple">
+  <tr><th>Responsibility</th><th>AI Agent</th><th>Backend / System</th><th>Human</th></tr>
+  <tr><td>Understand case / context</td><td>✓</td><td></td><td></td></tr>
+  <tr><td>Analyse receivable information</td><td>✓</td><td></td><td></td></tr>
+  <tr><td>Prioritise / recommend action</td><td>✓</td><td></td><td></td></tr>
+  <tr><td>Generate drafts &amp; justifications</td><td>✓</td><td></td><td></td></tr>
+  <tr><td>Select &amp; call governed tools</td><td>✓</td><td></td><td></td></tr>
+  <tr><td>Compute amounts / dates / eligibility</td><td></td><td>✓</td><td></td></tr>
+  <tr><td>Apply business rules R1–R6</td><td></td><td>✓</td><td></td></tr>
+  <tr><td>Database update / persistence</td><td></td><td>✓</td><td></td></tr>
+  <tr><td>Authorization / RBAC</td><td></td><td>✓</td><td></td></tr>
+  <tr><td>Notice approval (G1)</td><td></td><td></td><td>✓ Depot Manager</td></tr>
+  <tr><td>E-signature (G2)</td><td></td><td></td><td>✓ Advocate</td></tr>
+  <tr><td>Legal progression (G3) &amp; case file (G4)</td><td></td><td></td><td>✓ Legal</td></tr>
+  <tr><td>Confirm voice PTP</td><td></td><td></td><td>✓ TSI</td></tr>
+  <tr><td>Final legal decision / court filing</td><td></td><td></td><td>✓ Legal / Advocate</td></tr>
+</table>
+
+<div class="do-dont">
+  <div class="do"><strong>AI MAY:</strong><ul><li>Recommend Issue/Hold/Reconcile</li><li>Draft notices from graph facts</li><li>Plan visits; parse PTP</li><li>Assemble evidence bundles</li><li>Summarise recovery history</li></ul></div>
+  <div class="dont"><strong>AI MUST NOT:</strong><ul><li>Approve legal action</li><li>Compute legal amounts/dates/eligibility</li><li>Bypass rules or gates</li><li>Modify financial records</li><li>Call SubmitNotice</li></ul></div>
+</div>
+
+<!-- 11 FLOWCHART 3 -->
+<h1 class="sec page-break">11. Receivables Recovery Flow</h1>
+<div class="flow-title">FLOWCHART 3 — Receivables Recovery (Workflow A — ODOS Cycle)</div>
+<div class="flow">
+  <div class="box box-db">Gross Open AR (SAP)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">A1 — Deduct credits, rebates, returns, clearing, disputes</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">ComputeNetExposure → net_recoverable_exposure (R6 lineage)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A2 — Recoverability score → Tier</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Tier = Visit?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-ai">A6 Visit Plan → Skip Paper Notice</div></div>
+    <div class="branch-col"><div class="branch-label no">NOTICE</div><div class="box box-ai">A3 — Apply R1/R5</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Verdict?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">Hold / Reconcile</div><div class="box box-sys">Terminate → Finance (no G1)</div></div>
+    <div class="branch-col"><div class="branch-label yes">Issue</div><div class="box box-human">G1 Depot Manager</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A5 Draft → Self-Verify → G2 Advocate → Despatch</div>
+</div>
+<p><strong>Metric:</strong> net_recoverable_exposure = gross_open_AR − unapplied_credit_notes − accrued_scheme_rebates − goods_return_in_transit − cheques_in_clearing − disputed_under_review</p>
+
+<!-- 12 FLOWCHART 4 -->
+<h1 class="sec">12. Customer / Dealer Follow-up Flow</h1>
+<div class="flow-title">FLOWCHART 4 — Field Communication &amp; Dealer Contact</div>
+<div class="flow">
+  <div class="box box-sys">Notice Despatched OR Visit Tier Assigned</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A6 — Generate Prioritised Visit Plan (geo-clustered)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-user">TSI — Visit Dealer (Field Mobile App)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-user">TSI Records Feedback (voice or text)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">AI Parses Response → Structured Record</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Human Approval Required?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES (low ASR)</div><div class="box box-user">TSI Confirms PTP Before Commit</div></div>
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">Record PTP → Schedule Chase</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-user">Dealer Response Captured in Recovery Context</div>
+</div>
+<table class="simple">
+  <tr><th>Step</th><th>Who</th><th>What</th><th>Channel</th></tr>
+  <tr><td>1</td><td>HO Legal</td><td>Demand notice despatched to dealer</td><td>Physical / registered post</td></tr>
+  <tr><td>2</td><td>TSI</td><td>Prioritised visit task assigned</td><td>Field mobile app</td></tr>
+  <tr><td>3</td><td>TSI</td><td>Visit dealer; record feedback</td><td>Field app + voice</td></tr>
+  <tr><td>4</td><td>A6</td><td>Parse vernacular voice → PTP</td><td>Azure AI Speech + Agent</td></tr>
+  <tr><td>5</td><td>TSI</td><td>Confirm if ASR confidence low</td><td>Field app</td></tr>
+</table>
+
+<!-- 13 FLOWCHART 5 -->
+<h1 class="sec page-break">13. Payment Commitment / Payment Tracking Flow</h1>
+<div class="flow-title">FLOWCHART 5 — Promise-to-Pay (PTP) Tracking</div>
+<div class="flow">
+  <div class="box box-user">Dealer Commits Payment (PTP)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">Record PTP + Commitment Date</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">Track Until PTP Date</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Payment Received?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-sys">Update Status → Close / Reduce Exposure</div></div>
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">Broken-PTP Escalation</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Escalation Required?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-ai">Re-prioritise (A2) → Continue Recovery</div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-ai">Route to S138 Evaluation (A4) if criteria met</div></div>
+  </div>
+</div>
+<table class="simple">
+  <tr><th>Step</th><th>Who</th><th>What</th></tr>
+  <tr><td>1</td><td>TSI / A6</td><td>Capture PTP date and amount (voice → structured)</td></tr>
+  <tr><td>2</td><td>Backend</td><td>Schedule chase date; block notice if active PTP within grace (R1c)</td></tr>
+  <tr><td>3</td><td>ERP</td><td>Payment receipt updates ledger</td></tr>
+  <tr><td>4</td><td>A6 → A2</td><td>Broken PTP triggers re-prioritisation or escalation</td></tr>
+</table>
+
+<!-- 14 FLOWCHART 6 -->
+<h1 class="sec">14. Escalation Flow</h1>
+<div class="flow-title">FLOWCHART 6 — Escalation Path</div>
+<div class="flow">
+  <div class="box box-db">Overdue Case — Recovery Attempts Underway</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Payment / PTP Successful?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-end">Close Case</div></div>
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">Escalation Trigger Fires</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A8 — Exception to ASM/HO (no visit, broken PTP, gate expiry)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">60 Days Since Notice + No Payment?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-ai">Continue Recovery (A6 / A2)</div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-db">Enter Workflow B — Cheque Deposit</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A4 — S138 Eligibility Check (R2)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Eligible?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">Block — Continue Recovery or Close</div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-human">G3 Legal Progression Review</div></div>
+  </div>
+</div>
+<table class="simple">
+  <tr><th>Trigger</th><th>Action</th><th>Owner</th></tr>
+  <tr><td>R1b — credit ratio &gt; 40%</td><td>Reconcile → Finance; no notice</td><td>Rules Engine</td></tr>
+  <tr><td>Broken PTP</td><td>Re-prioritise or escalate</td><td>A6 → A2</td></tr>
+  <tr><td>No TSI visit on prioritised dealer</td><td>Exception to ASM/HO</td><td>A8</td></tr>
+  <tr><td>Limitation T-10 / T-5 / T-2</td><td>Alert named legal owner</td><td>A4 / R3</td></tr>
+  <tr><td>Clock expired</td><td>Case blocked — Expired</td><td>Rules Engine</td></tr>
+  <tr><td>Notice + 60 days no payment</td><td>Workflow B entry</td><td>Portal rule</td></tr>
+</table>
+
+<!-- 15 FLOWCHART 7 -->
+<h1 class="sec page-break">15. Section 138 Eligibility / Legal Action Flow</h1>
+<div class="flow-title">FLOWCHART 7 — Section 138 Process (Workflow B)</div>
+<div class="flow">
+  <div class="box box-db">Demand Notice Sent — No Payment in 60 Days</div>
+  <div class="arrow">↓</div>
+  <div class="box box-user">Depot Admin — Cheque Particulars + Scan</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">Document Intelligence vs Hand-Keyed — Reconcile or Flag</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Cheque Status?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">REALISED</div><div class="box box-end">Case Closed</div></div>
+    <div class="branch-col"><div class="branch-label no">BOUNCED</div><div class="box box-ai">A4 — CheckSection138Eligibility + GetLimitationClock</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Eligible (R2)?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">Block Before Courier Chain</div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-human">G3 — Legal Progression Approval</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-user">Courier to HO → Re-Deposit → Status Update</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A5 — Draft S138 Notice → Self-Verify</div>
+  <div class="arrow">↓</div>
+  <div class="box box-legal">G2 — Advocate E-Sign</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A7 — Assemble Case File + Completeness Score</div>
+  <div class="arrow">↓</div>
+  <div class="box box-human">G4 — Legal Case File Review</div>
+  <div class="arrow">↓</div>
+  <div class="box box-legal">Legal Action → Court → Status Tracking → Closure</div>
+</div>
+<table class="simple">
+  <tr><th>Step</th><th>Who</th><th>What</th><th>After Legal Action Starts</th></tr>
+  <tr><td>1</td><td>A4</td><td>Compute notice-by, cure-window, file-by dates</td><td>Alerts at T-10/T-5/T-2</td></tr>
+  <tr><td>2</td><td>Legal (G3)</td><td>Approve progression before physical chain</td><td>Courier / re-deposit proceeds</td></tr>
+  <tr><td>3</td><td>A5 + Advocate</td><td>Draft and e-sign S138 notice</td><td>Notice served to dealer</td></tr>
+  <tr><td>4</td><td>A7 + Legal (G4)</td><td>Court-ready bundle reviewed</td><td>Ready for filing</td></tr>
+  <tr><td>5</td><td>Legal / TSI</td><td>Court summons, warrant tracking</td><td><em>Manual — portal column; no agent defined (TBC)</em></td></tr>
+</table>
+<p><strong>R2 eligibility:</strong> Enforceable debt in ledger + valid presentation + return-memo reason code in qualifying set. Missed statutory date <strong>extinguishes</strong> the case.</p>
+
+<!-- 16 FLOWCHART 8 -->
+<h1 class="sec">16. Human Approval / Human-in-the-Loop</h1>
+<div class="flow-title">FLOWCHART 8 — Human-in-the-Loop (All Gates)</div>
+<div class="flow">
+  <div class="box box-ai">AI Agent Recommends Action with Evidence</div>
+  <div class="arrow">↓</div>
+  <div class="box box-human">Human Review at Gate</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Approved?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO / EXPIRED</div><div class="box box-sys">Blocked — Reason Logged — Audit Recorded<br><em>Expiry ≠ Approved</em></div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-sys">Workflow Resumes from Checkpoint</div></div>
+  </div>
+</div>
+<table class="simple">
+  <tr><th>Gate</th><th>Name</th><th>Approver</th><th>When</th><th>Expiry</th></tr>
+  <tr><td>G1</td><td>gate_depot_manager</td><td>Depot Manager</td><td>After A3 recommends Issue only</td><td>Declined — NOT approved</td></tr>
+  <tr><td>G2</td><td>gate_advocate_signature</td><td>Advocate</td><td>After A5 self-verification passes</td><td>Case held — no dispatch</td></tr>
+  <tr><td>G3</td><td>gate_legal_progression</td><td>Legal Team</td><td>After A4 in Workflow B</td><td>Case blocked</td></tr>
+  <tr><td>G4</td><td>gate_legal_case_file_review</td><td>Legal Team</td><td>After A7 assembly</td><td>Case held — gaps flagged</td></tr>
+</table>
+<p><strong>Also human:</strong> TSI confirms low-confidence PTP; Depot Admin corrects cheque extraction mismatches. <strong>R4:</strong> Recommending agent cannot approve.</p>
+
+<!-- 17 FLOWCHART 9 -->
+<h1 class="sec page-break">17. Documents and Evidence</h1>
+<div class="flow-title">FLOWCHART 9 — Document / Evidence Assembly</div>
+<div class="flow">
+  <div class="box box-db">Case Requires Documents</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">Identify Required Documents (by workflow stage)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-ai">A7 / A3 — Collect from SAP, Blob, Portal, Field App</div>
+  <div class="arrow">↓</div>
+  <div class="box box-sys">Validate Extraction (Document Intelligence) + Lineage (R6)</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Complete?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-user">Flag Gaps → Depot Admin / Legal Action</div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-ai">Completeness Score → Case File Bundle</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-human">G4 Legal Review → Proceed to Filing</div>
+</div>
+<table class="simple">
+  <tr><th>Document</th><th>Used In</th><th>Source</th></tr>
+  <tr><td>Ledger extract / invoices</td><td>Reconciliation, notice amount</td><td>SAP</td></tr>
+  <tr><td>Credit notes, rebates, returns</td><td>Net exposure (A1)</td><td>SAP</td></tr>
+  <tr><td>Dealer agreement</td><td>Entity resolution, enforceability</td><td>Blob</td></tr>
+  <tr><td>Security cheque image</td><td>S138 eligibility</td><td>Blob + Doc Intelligence</td></tr>
+  <tr><td>Cheque return memo</td><td>R2, limitation clock anchor</td><td>Blob + Doc Intelligence</td></tr>
+  <tr><td>Demand notice + delivery proof</td><td>S138 prerequisite</td><td>Blob (WORM, 8-year)</td></tr>
+  <tr><td>Courier POD</td><td>Physical chain evidence</td><td>Portal / Blob</td></tr>
+  <tr><td>Field visit + PTP</td><td>Recovery tracking</td><td>Field app</td></tr>
+  <tr><td>S138 notice draft</td><td>Legal action</td><td>A5 → G2</td></tr>
+  <tr><td>Court-ready bundle</td><td>Filing</td><td>A7 + completeness score</td></tr>
+</table>
+
+<!-- 18 -->
+<h1 class="sec">18. Business Rules</h1>
+<table class="simple">
+  <tr><th>Rule</th><th>Business Rule</th><th>Owner</th></tr>
+  <tr><td>R1a</td><td>Hold notice if position unreconciled</td><td>Rules Engine</td></tr>
+  <tr><td>R1b</td><td>Hold if unapplied_credits / claim_amount &gt; 40%</td><td>Rules Engine</td></tr>
+  <tr><td>R1c</td><td>Hold if Dispute UNDER_REVIEW or active PTP within grace</td><td>Rules Engine</td></tr>
+  <tr><td>R2</td><td>s138_eligible: enforceable debt + valid presentation + qualifying return reason</td><td>Rules Engine (A4)</td></tr>
+  <tr><td>R3</td><td>Statutory clock; alert T-10, T-5, T-2 to named owner</td><td>Limitation Clock Service</td></tr>
+  <tr><td>R4</td><td>Segregation of duties — recommender ≠ approver</td><td>Workflow design</td></tr>
+  <tr><td>R5</td><td>Block all action if insolvency moratorium</td><td>Rules Engine</td></tr>
+  <tr><td>R6</td><td>No notice amount without lineage to source rows</td><td>Metric Contract (A1)</td></tr>
+</table>
+<p>Rules are versioned code owned by Legal/Finance — not prompt text.</p>
+
+<!-- 19 FLOWCHART 10 -->
+<h1 class="sec page-break">19. Exception / Failure Scenarios</h1>
+<div class="flow-title">FLOWCHART 10 — Exception Handling</div>
+<div class="flow">
+  <div class="box box-db">Case / Request Received</div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Can ARC Process?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-human">Manual Review / Finance / Legal</div></div>
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-sys">Continue Workflow</div></div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="box box-decision">Backend / Rules Error?</div>
+  <div class="branch">
+    <div class="branch-col"><div class="branch-label yes">YES</div><div class="box box-sys">Fail Closed — Block Case</div></div>
+    <div class="branch-col"><div class="branch-label no">NO</div><div class="box box-sys">Proceed to Next Stage</div></div>
+  </div>
+</div>
+<table class="simple">
+  <tr><th>Scenario</th><th>Behaviour</th></tr>
+  <tr><td>A1 cannot reconcile</td><td>UNRECONCILED → Finance; never assume owed</td></tr>
+  <tr><td>Rules engine / clock unavailable</td><td>Fail closed — no case proceeds</td></tr>
+  <tr><td>A5 self-verification mismatch</td><td>Block draft — no best-effort notice</td></tr>
+  <tr><td>Low ASR on voice PTP</td><td>TSI confirmation; hard floor → discard</td></tr>
+  <tr><td>Duplicate dealer SAP codes</td><td>Entity resolution merge before exposure</td></tr>
+  <tr><td>Credit note after approval, before despatch</td><td>Re-validate; block if exposure changed</td></tr>
+  <tr><td>Cheque MICR contradicts portal entry</td><td>Flag Depot Admin; block progression</td></tr>
+  <tr><td>Non-qualifying return reason</td><td>R2 blocks before courier</td></tr>
+  <tr><td>Insolvency moratorium mid-cycle</td><td>R5 blocks every action</td></tr>
+  <tr><td>Depot Manager never responds</td><td>Gate expires — NOT approved</td></tr>
+  <tr><td>Checkpoint restore on different instance</td><td>Resume from persisted state</td></tr>
+  <tr><td>Overlapping cycles same dealer</td><td>Idempotency key prevents double-issue</td></tr>
+</table>
+
+<!-- 20 -->
+<h1 class="sec">20. Security and Audit</h1>
+<table class="simple">
+  <tr><th>Area</th><th>Requirement</th></tr>
+  <tr><td>Authentication</td><td>Microsoft Entra ID; managed identity end-to-end</td></tr>
+  <tr><td>Authorization</td><td>RBAC server-side — TSI cannot read other regions</td></tr>
+  <tr><td>Segregation</td><td>R4 — recommender ≠ approver</td></tr>
+  <tr><td>PII</td><td>Redaction before model calls</td></tr>
+  <tr><td>Secrets</td><td>Azure Key Vault — no connection strings in config</td></tr>
+  <tr><td>Legal artefacts</td><td>WORM Blob, 8-year retention</td></tr>
+  <tr><td>Audit</td><td>Every gate decision: actor, role, verdict, reason, timestamp, correlation ID</td></tr>
+  <tr><td>Traceability</td><td>Every amount traceable to metric contract + source rows (R6)</td></tr>
+  <tr><td>Observability</td><td>OpenTelemetry: arc.cycle → arc.dealer → arc.executor → arc.gate</td></tr>
+  <tr><td>Shadow mode</td><td>Full cycle computable with zero external side effects</td></tr>
+</table>
+
+<!-- 21 -->
+<h1 class="sec page-break">21. High-Level Architecture</h1>
+<div class="arch">                 BUSINESS USER (Depot Manager / TSI / Legal)
+                              │
+                              ▼
+                    ┌───────────────────┐
+                    │   ARC Application  │
+                    └─────────┬─────────┘
+                              │
+                              ▼
+                    ┌───────────────────┐
+                    │    AI AGENTS       │
+                    │  A1–A8             │
+                    │  Understand        │
+                    │  Analyse           │
+                    │  Recommend         │
+                    │  Tool Selection    │
+                    └─────────┬─────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+  ComputeNetExposure   CheckSection138Elig.   SearchDocuments
+  GetLimitationClock   TraverseGraph          Document Intelligence
+         │                    │                    │
+         └────────────────────┼────────────────────┘
+                              ▼
+                    ┌───────────────────┐
+                    │ Business Services  │
+                    │ Rules Engine R1–R6 │
+                    │ Validation         │
+                    │ Authorization      │
+                    └─────────┬─────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+    Azure SQL              Cosmos DB           Azure Blob
+    (Ledger/Master)   (State/Checkpoints)  (Legal Artefacts)
+         │                    │
+         ▼                    ▼
+       SAP / ERP         Human Gates G1–G4
+                              │
+                              ▼
+                    Legal / Recovery Process</div>
+
+<h2 class="sub">21.1 Workflow Topology</h2>
+<div class="arch">Workflow A (ODOS):  A1 → A2 → A3 ⟨G1⟩ → A5 ⟨G2⟩ → A6
+                      │ Visit tier ─────────────────→ A6  [skip paper]
+                      └ Reconcile/Hold ──→ TERMINATE → Finance
+
+Workflow B (S138):  A1 → A4 ⟨G3⟩ → A5 ⟨G2⟩ → A7 ⟨G4⟩</div>
+
+<!-- 22 -->
+<h1 class="sec">22. Acceptance Criteria</h1>
+<table class="simple">
+  <tr><th>#</th><th>Criterion</th><th>Target</th></tr>
+  <tr><td>1</td><td>Both workflows with 4 HITL gates as RequestPort suspensions</td><td>Required</td></tr>
+  <tr><td>2</td><td>Workflow survives restart; resumes from checkpoint</td><td>Required</td></tr>
+  <tr><td>3</td><td>Amounts/dates/eligibility traceable to rules + source rows (R6)</td><td>100%</td></tr>
+  <tr><td>4</td><td>No LLM output as final authorization</td><td>Zero tolerance</td></tr>
+  <tr><td>5</td><td>Rules R1–R6 unit-tested, versioned</td><td>Required</td></tr>
+  <tr><td>6</td><td>Statutory dates by rules engine; T-10/T-5/T-2 alerts</td><td>Zero misses</td></tr>
+  <tr><td>7</td><td>Wrongful-notice rate</td><td>&lt; 1%</td></tr>
+  <tr><td>8</td><td>RBAC enforced server-side</td><td>Required</td></tr>
+  <tr><td>9</td><td>Full cycle in shadow mode — issue nothing</td><td>Required</td></tr>
+</table>
+<h2 class="sub">22.1 Demo Scenarios (S1–S9)</h2>
+<table class="simple">
+  <tr><th>ID</th><th>Scenario</th><th>Expected</th></tr>
+  <tr><td>S1</td><td>Clean overdue, no credits</td><td>Notice approved → drafted → visit task</td></tr>
+  <tr><td>S2</td><td>77% gross AR is credit note</td><td>R1b blocks → Reconcile → Finance</td></tr>
+  <tr><td>S3</td><td>Bounced security cheque</td><td>Full path to S138 case file</td></tr>
+  <tr><td>S4</td><td>Non-qualifying bounce reason</td><td>R2 blocks before courier</td></tr>
+  <tr><td>S5</td><td>3 days left on filing clock</td><td>T-2 alert to named owner</td></tr>
+  <tr><td>S6</td><td>Dealer under moratorium</td><td>R5 blocks all action</td></tr>
+  <tr><td>S7</td><td>Voice PTP at 0.72 confidence</td><td>TSI confirmation required</td></tr>
+  <tr><td>S8</td><td>Gate approval 6 days after pause</td><td>Resume from checkpoint</td></tr>
+  <tr><td>S9</td><td>Duplicate dealer identity</td><td>Entity merge before exposure</td></tr>
+</table>
+
+<!-- 23 -->
+<h1 class="sec">23. Summary</h1>
+<div class="summary-box">
+  <strong>ARC in one page:</strong><br>
+  PaintCo has ~2,900 dealers. When receivables go overdue (&gt;90 days, &gt;₹5,000), ARC runs two workflows: <strong>ODOS demand-notice recovery</strong> and <strong>Section 138 legal escalation</strong> (after 60 days non-payment + cheque bounce). Eight AI agents reconcile AR, prioritise dealers, recommend notices, orchestrate field visits, guard legal eligibility, draft documents, and assemble evidence — always through governed tools and human gates. The backend rules engine owns all amounts, dates, and eligibility. Humans approve at four gates. Read Sections 9–19 flowcharts to understand the complete process.
+</div>
+
+<h2 class="sub">23.1 To Be Confirmed (Not Invented in This BRD)</h2>
+<div class="tbc">
+<table class="simple">
+  <tr><th>Item</th><th>Status</th></tr>
+  <tr><td>Exact statutory periods (notice/cure/filing windows)</td><td>Confirm with Legal counsel — versioned config, not prompts</td></tr>
+  <tr><td>Clock anchor for dishonour (memo received vs issue date)</td><td>Policy decision required</td></tr>
+  <tr><td>Second bounce — which dishonour anchors clock</td><td>Policy decision required</td></tr>
+  <tr><td>15th timeline freeze mapping to agent workflow</td><td>Not mapped in Problem Statement topology</td></tr>
+  <tr><td>Arrest warrant escalation automation</td><td>Portal column exists; no agent/workflow defined</td></tr>
+  <tr><td>Hold vs Reconcile handling in A3 termination</td><td>Clarify with Legal/Finance</td></tr>
+  <tr><td>R1b denominator (claim_amount vs gross_open_AR)</td><td>Reconcile rule text with implementation</td></tr>
+  <tr><td>ASR hard-floor discard threshold</td><td>Not numerically specified in source</td></tr>
+  <tr><td>Physical courier chain automation</td><td>Manual steps remain; system blocks ineligible pre-courier</td></tr>
+</table>
+</div>
+
+<div class="end">— End of Document —<br>ARC Business Requirements Document v2.0 | 28-Aug-2026</div>
+
+</body>
+</html>
