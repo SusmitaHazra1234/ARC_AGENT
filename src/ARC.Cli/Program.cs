@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Checkpointing;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -38,7 +37,7 @@ builder.Services.AddSingleton<IEvidenceDocumentRepository>(sp => sp.GetRequiredS
 builder.Services.AddSingleton<IServiceBusPublisher>(sp => sp.GetRequiredService<InMemoryArcStore>());
 builder.Services.AddSingleton<IKnowledgeRetrievalService, EmptyKnowledgeRetrievalService>();
 builder.Services.AddSingleton<IGraphTraversal, EmptyGraphTraversal>();
-builder.Services.AddSingleton<IChatClient, ShadowNarrationChatClient>();
+builder.Services.AddArcLlm(builder.Configuration);
 builder.Services.AddSingleton<MemoryJsonCheckpointStore>();
 builder.Services.AddSingleton<ICheckpointStore<JsonElement>>(sp => sp.GetRequiredService<MemoryJsonCheckpointStore>());
 builder.Services.AddSingleton(sp => CheckpointManager.CreateJson(

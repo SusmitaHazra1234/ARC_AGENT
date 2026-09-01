@@ -16,6 +16,18 @@ public sealed class ArcKnowledgeOptions
 
     public int RetrievalTopK { get; set; } = 8;
 
+    /// <summary>On-disk Lucene BM25 index directory (lexical / word search).</summary>
+    public string LexicalIndexDirectory { get; set; } = Path.Combine("data", "lucene-index");
+
+    public int DenseCandidates { get; set; } = 24;
+
+    public int LexicalCandidates { get; set; } = 24;
+
+    public int FusionCandidates { get; set; } = 16;
+
+    /// <summary>RRF constant k (Cormack). Higher k reduces the gap between ranks.</summary>
+    public int RrfK { get; set; } = 60;
+
     /// <summary>Source auto-accept thresholds for extraction quality only — not eligibility.</summary>
     public decimal ChequeNumberConfidence { get; set; } = 0.90m;
     public decimal MicrConfidence { get; set; } = 0.90m;

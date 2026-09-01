@@ -3,7 +3,7 @@ using Microsoft.Extensions.AI;
 
 namespace ARC.Integration.Tests.Fixtures;
 
-/// <summary>Empty narration client — mirrors Host ShadowNarrationChatClient (no Azure OpenAI).</summary>
+/// <summary>Empty narration client — mirrors <c>ShadowLlmFactory</c> (no Azure OpenAI).</summary>
 internal sealed class StubChatClient : IChatClient
 {
     public ChatClientMetadata Metadata { get; } = new("arc-integration-stub");

@@ -13,7 +13,7 @@ public interface IKnowledgeRetrievalService
 }
 
 /// <summary>
-/// Hybrid retrieval: graph traversal + filtered document search.
+/// Hybrid retrieval: graph traversal + Cosmos dense + Lucene BM25, fused with RRF.
 /// Does not decide eligibility, notices, or legal progression.
 /// </summary>
 public sealed class KnowledgeRetrievalService : IKnowledgeRetrievalService

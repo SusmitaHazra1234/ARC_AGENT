@@ -38,7 +38,7 @@
     <tr><th>Attribute</th><th>Value</th></tr>
     <tr><td>Solution</td><td>ARC</td></tr>
     <tr><td>Primary Reference</td><td>Problem_Statement_1_Receivables_Recovery_Section138 (Organization-approved)</td></tr>
-    <tr><td>Stack</td><td>C# · .NET 9 · Microsoft Agent Framework 1.0 · Azure</td></tr>
+    <tr><td>Stack</td><td>C# · .NET 8 · Microsoft Agent Framework 1.0 · Azure</td></tr>
     <tr><td>Version</td><td>1.0</td></tr>
     <tr><td>Date</td><td>28-Aug-2026</td></tr>
     <tr><td>Status</td><td>Architecture — Pre-Implementation</td></tr>
@@ -72,7 +72,7 @@
 <h2 class="sub">1.1 Mandated Technical Stack (from Source)</h2>
 <table class="simple">
   <tr><th>Concern</th><th>Service / Package</th></tr>
-  <tr><td>Runtime</td><td>C# · .NET 9</td></tr>
+  <tr><td>Runtime</td><td>C# · .NET 8</td></tr>
   <tr><td>Orchestration</td><td>Microsoft Agent Framework 1.0 — WorkflowBuilder, RequestPort, durable checkpoints</td></tr>
   <tr><td>Models</td><td>Azure OpenAI (Foundry) — reasoning for A3/A4 explanation; cheaper model for extraction/summary</td></tr>
   <tr><td>Master data</td><td>Azure SQL</td></tr>
@@ -599,7 +599,7 @@
   <tr><th>Project</th><th>Responsibility</th></tr>
   <tr><td><strong>ARC.Domain</strong></td><td>Entities, metric contracts, rules (R1–R6), limitation clock, RecoveryState, enums, interfaces. Zero infrastructure dependencies.</td></tr>
   <tr><td><strong>ARC.Data</strong></td><td>Azure SQL repositories, Cosmos checkpoint/store, Blob document repository, GateDecision persistence.</td></tr>
-  <tr><td><strong>ARC.Knowledge</strong></td><td>Knowledge graph traversal, hybrid retrieval (graph + keyword + vector), Document Intelligence extraction wrappers.</td></tr>
+  <tr><td><strong>ARC.Knowledge</strong></td><td>Knowledge graph traversal, hybrid retrieval (graph + Cosmos dense/vector + Lucene BM25 lexical, RRF fusion), Document Intelligence extraction wrappers.</td></tr>
   <tr><td><strong>ARC.Tools</strong></td><td>Governed AI tool surface: ComputeNetExposure, CheckSection138Eligibility, GetLimitationClock, SearchDocuments, TraverseGraph. MCP server.</td></tr>
   <tr><td><strong>ARC.Agents</strong></td><td>MAF executors A1–A8, Workflow A/B graphs, RequestPort gates, middleware (PII, OTel), IOutboundGate.</td></tr>
   <tr><td><strong>ARC.Host.Functions</strong></td><td>Azure Functions durable host binding, cycle triggers, Service Bus consumers, checkpoint resume.</td></tr>
@@ -696,7 +696,7 @@
   <li>Five governed tools (no SubmitNotice)</li>
   <li>Metric contract net_recoverable_exposure with R6 LineItemRef lineage</li>
   <li>Document Intelligence with confidence thresholds (0.90/0.90/0.85)</li>
-  <li>Hybrid retrieval: graph + keyword + vector (Cosmos diskANN)</li>
+  <li>Hybrid retrieval: graph + Cosmos dense (VectorDistance) + Lucene BM25 lexical, fused with RRF</li>
   <li>Shadow / Assisted / Live run modes via IOutboundGate</li>
   <li>Idempotency key (cycle_id, dealer_urn, node)</li>
   <li>GateDecision immutable audit + Cosmos auditEvents (8-year)</li>

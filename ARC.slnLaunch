@@ -1,0 +1,20 @@
+[
+  {
+    "Name": "ARC.Api",
+    "Projects": [
+      {
+        "Path": "src\\ARC.Api\\ARC.Api.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "ARC.Cli (Shadow demo)",
+    "Projects": [
+      {
+        "Path": "src\\ARC.Cli\\ARC.Cli.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

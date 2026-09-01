@@ -9,3 +9,4 @@ secrets.json
 *.nupkg
 TestResults/
 artifacts/
+data/lucene-index/

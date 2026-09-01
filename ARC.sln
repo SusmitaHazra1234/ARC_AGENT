@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -6,6 +6,12 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B8C1A2D4-5E6F-4789-A012-3456789ABCDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Api", "src\ARC.Api\ARC.Api.csproj", "{0CC3B59B-526F-460B-ACDB-646D090A7AA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Cli", "src\ARC.Cli\ARC.Cli.csproj", "{FB32AC05-8F11-4125-A111-CEAFD4312DD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Host.Functions", "src\ARC.Host.Functions\ARC.Host.Functions.csproj", "{D050B798-3D91-4150-AC6B-980F839A265E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Domain", "src\ARC.Domain\ARC.Domain.csproj", "{6601CAE5-7434-4D9B-BB14-2F9597D2461A}"
 EndProject
@@ -17,12 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Tools", "src\ARC.Tools\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Agents", "src\ARC.Agents\ARC.Agents.csproj", "{5878D8E3-D880-4C38-9DD5-53C5E34A05AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Host.Functions", "src\ARC.Host.Functions\ARC.Host.Functions.csproj", "{D050B798-3D91-4150-AC6B-980F839A265E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Api", "src\ARC.Api\ARC.Api.csproj", "{0CC3B59B-526F-460B-ACDB-646D090A7AA6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Cli", "src\ARC.Cli\ARC.Cli.csproj", "{FB32AC05-8F11-4125-A111-CEAFD4312DD0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Domain.Tests", "tests\ARC.Domain.Tests\ARC.Domain.Tests.csproj", "{E471F96E-8386-4044-9A0E-C5FB03697FBE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Agents.Tests", "tests\ARC.Agents.Tests\ARC.Agents.Tests.csproj", "{9C3BBE8B-770C-45CB-AF7D-14CC9246552A}"
@@ -30,6 +30,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Eval", "tests\ARC.Eval\ARC.Eval.csproj", "{43166E5A-894A-45FB-AC3D-E7F5B76C596B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Integration.Tests", "tests\ARC.Integration.Tests\ARC.Integration.Tests.csproj", "{F54288E9-29D8-4E04-8D5A-71F781CCC3AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARC.Knowledge.Tests", "tests\ARC.Knowledge.Tests\ARC.Knowledge.Tests.csproj", "{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -185,6 +187,18 @@ Global
 		{F54288E9-29D8-4E04-8D5A-71F781CCC3AE}.Release|x64.Build.0 = Release|Any CPU
 		{F54288E9-29D8-4E04-8D5A-71F781CCC3AE}.Release|x86.ActiveCfg = Release|Any CPU
 		{F54288E9-29D8-4E04-8D5A-71F781CCC3AE}.Release|x86.Build.0 = Release|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Debug|x64.Build.0 = Debug|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Debug|x86.Build.0 = Debug|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Release|x64.ActiveCfg = Release|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Release|x64.Build.0 = Release|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Release|x86.ActiveCfg = Release|Any CPU
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -202,5 +216,6 @@ Global
 		{9C3BBE8B-770C-45CB-AF7D-14CC9246552A} = {B8C1A2D4-5E6F-4789-A012-3456789ABCDE}
 		{43166E5A-894A-45FB-AC3D-E7F5B76C596B} = {B8C1A2D4-5E6F-4789-A012-3456789ABCDE}
 		{F54288E9-29D8-4E04-8D5A-71F781CCC3AE} = {B8C1A2D4-5E6F-4789-A012-3456789ABCDE}
+		{7F3E9C21-8A54-4B16-9D2E-1C4A8F6B0D33} = {B8C1A2D4-5E6F-4789-A012-3456789ABCDE}
 	EndGlobalSection
 EndGlobal
