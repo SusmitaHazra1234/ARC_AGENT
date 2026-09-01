@@ -1,3 +1,4 @@
+using Azure;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ public static class ArcKeyVaultConfiguration
 
     /// <summary>
     /// Reads every enabled secret from the vault at <c>KeyVault:VaultUri</c> into configuration.
-    /// No per-secret keys are required in appsettings.
+    /// Skips silently when the vault is unreachable (typical local dev without Azure sign-in).
     /// </summary>
     public static IConfigurationBuilder AddArcKeyVault(this IConfigurationBuilder builder)
     {
@@ -26,21 +27,28 @@ public static class ArcKeyVaultConfiguration
         if (uri is null)
             return builder;
 
-        var client = new SecretClient(uri, new DefaultAzureCredential());
-        var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var property in client.GetPropertiesOfSecrets())
+        try
         {
-            if (property.Enabled == false)
-                continue;
+            var client = new SecretClient(uri, new DefaultAzureCredential());
+            var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
-            var secret = client.GetSecret(property.Name);
-            var name = property.Name;
-            var value = secret.Value.Value;
-            values[name] = value;
-            values[name.Replace("--", ConfigurationPath.KeyDelimiter)] = value;
+            foreach (var property in client.GetPropertiesOfSecrets())
+            {
+                if (property.Enabled == false)
+                    continue;
+
+                var secret = client.GetSecret(property.Name);
+                var name = property.Name;
+                var value = secret.Value.Value;
+                values[name] = value;
+                values[name.Replace("--", ConfigurationPath.KeyDelimiter)] = value;
+            }
+
+            return builder.AddInMemoryCollection(values);
         }
-
-        return builder.AddInMemoryCollection(values);
+        catch (Exception ex) when (ex is CredentialUnavailableException or RequestFailedException or AuthenticationFailedException)
+        {
+            return builder;
+        }
     }
 }

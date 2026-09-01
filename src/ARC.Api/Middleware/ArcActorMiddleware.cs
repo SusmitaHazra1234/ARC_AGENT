@@ -25,7 +25,9 @@ public sealed class ArcActorMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.Request.Path.StartsWithSegments("/health"))
+        var path = context.Request.Path;
+        if (path.StartsWithSegments("/health")
+            || !path.StartsWithSegments("/v1"))
         {
             await _next(context);
             return;

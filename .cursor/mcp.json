@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "arc-tools": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "src/ARC.McpServer/ARC.McpServer.csproj"
+      ]
+    }
+  }
+}

@@ -7,9 +7,11 @@ using ARC.Api.Middleware;
 using ARC.Data.Configuration;
 using ARC.Data.DependencyInjection;
 using ARC.Knowledge.DependencyInjection;
+using ARC.Api.Services;
 using ARC.Tools.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.Development.local.json", optional: true, reloadOnChange: true);
 builder.Configuration.AddArcKeyVault();
 builder.Services.Configure<ArcApiOptions>(builder.Configuration.GetSection(ArcApiOptions.SectionName));
 builder.Services.AddProblemDetails();
@@ -37,9 +39,12 @@ builder.Services.AddArcKnowledge(builder.Configuration);
 builder.Services.AddArcTools(builder.Configuration);
 builder.Services.AddArcLlm(builder.Configuration);
 builder.Services.AddArcAgents();
+builder.Services.AddSingleton<ChatOrchestrator>();
 
 var app = builder.Build();
 app.UseExceptionHandler();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 if (!string.IsNullOrWhiteSpace(apiOptions.JwtAuthority))
 {
     app.UseAuthentication();

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Legal Outstanding Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/chat.css" />
+  <link rel="icon" href="/images/loc-logo.svg" type="image/svg+xml" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <img src="/images/loc-logo.svg" alt="Legal Outstanding Chat" class="logo" width="48" height="48" />
+        <div>
+          <h1>Legal Outstanding Chat</h1>
+          <p>Outstanding dues · legal intelligence</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Capabilities">
+        <p class="nav-label">Governed capabilities</p>
+        <ul>
+          <li><span class="nav-icon">◆</span> Exposure &amp; risk analysis</li>
+          <li><span class="nav-icon">◆</span> Notice decisions</li>
+          <li><span class="nav-icon">◆</span> Legal eligibility</li>
+          <li><span class="nav-icon">◆</span> Outstanding recovery workflows</li>
+        </ul>
+      </nav>
+
+      <section class="session-card">
+        <h2>Active session</h2>
+        <dl class="session-summary" id="sessionSummary"></dl>
+        <button type="button" class="btn-ghost" id="resetSession">Start new session</button>
+      </section>
+
+      <footer class="sidebar-footer">
+        <span class="badge">Shadow mode</span>
+        <span>Governed tools only</span>
+      </footer>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+    <div class="workspace">
+      <header class="workspace-header">
+        <button type="button" class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <div class="workspace-title">
+          <h2>Conversation</h2>
+          <p id="headerStatus">
+            <span class="status-dot"></span>
+            Legal outstanding · governed tools
+          </p>
+        </div>
+      </header>
+
+      <div class="chat-panel">
+        <main class="chat-body" id="chatBody">
+          <div class="chat-thread" id="chatThread"></div>
+        </main>
+
+        <div class="chat-actions">
+          <div class="quick-replies" id="quickReplies" hidden></div>
+          <footer class="chat-footer">
+            <form id="chatForm" class="composer">
+              <input
+                type="text"
+                id="messageInput"
+                placeholder="Type a message…"
+                autocomplete="off"
+                maxlength="2000"
+              />
+              <button type="submit" class="send-btn" id="sendBtn" aria-label="Send">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M3.4 20.4 21 12 3.4 3.6l1.8 7.2L16 12l-10.8 1.2-1.8 7.2z"/>
+                </svg>
+                <span>Send</span>
+              </button>
+            </form>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/chat.js"></script>
+</body>
+</html>

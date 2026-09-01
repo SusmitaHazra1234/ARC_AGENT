@@ -1,0 +1,17 @@
+{
+  "ArcData": {
+    "Sql": {
+      "ConnectionString": "Server=tcp:arc-sql-01.database.windows.net,1433;Initial Catalog=arcAdmin;User ID=arcAdmin;Password=YOUR_PASSWORD;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+      "UseManagedIdentity": false
+    },
+    "Cosmos": {
+      "ConnectionString": "AccountEndpoint=https://arc-vector-store.documents.azure.com:443/;AccountKey=YOUR_COSMOS_PRIMARY_KEY;",
+      "UseManagedIdentity": false,
+      "DatabaseId": "arc",
+      "DocumentsContainer": "documents"
+    },
+    "Blob": {
+      "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=YOUR_STORAGE_ACCOUNT;AccountKey=YOUR_STORAGE_KEY;EndpointSuffix=core.windows.net"
+    }
+  }
+}
