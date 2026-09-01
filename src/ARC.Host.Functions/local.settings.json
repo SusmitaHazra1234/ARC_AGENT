@@ -7,6 +7,8 @@
     "CycleFanOutQueue": "arc-cycle-fanout",
     "GateResumeQueue": "arc-gate-resume",
     "ServiceBusConnection": "",
+    "KeyVault:VaultUri": "https://mcc-arc-key-vault.vault.azure.net/",
+    "Llm:Provider": "Shadow",
     "ArcHost:DefaultRunMode": "Shadow"
   }
 }

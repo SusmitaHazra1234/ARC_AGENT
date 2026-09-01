@@ -1,16 +1,16 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.AI;
 using ARC.Agents.DependencyInjection;
 using ARC.Api.Auth;
 using ARC.Api.Configuration;
 using ARC.Api.Middleware;
-using ARC.Api.Services;
+using ARC.Data.Configuration;
 using ARC.Data.DependencyInjection;
 using ARC.Knowledge.DependencyInjection;
 using ARC.Tools.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddArcKeyVault();
 builder.Services.Configure<ArcApiOptions>(builder.Configuration.GetSection(ArcApiOptions.SectionName));
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ArcExceptionHandler>();
@@ -35,7 +35,7 @@ if (!string.IsNullOrWhiteSpace(apiOptions.JwtAuthority))
 builder.Services.AddArcData(builder.Configuration);
 builder.Services.AddArcKnowledge(builder.Configuration);
 builder.Services.AddArcTools(builder.Configuration);
-builder.Services.AddSingleton<IChatClient, ShadowNarrationChatClient>();
+builder.Services.AddArcLlm(builder.Configuration);
 builder.Services.AddArcAgents();
 
 var app = builder.Build();

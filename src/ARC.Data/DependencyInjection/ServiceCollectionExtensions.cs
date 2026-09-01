@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using ARC.Data.Blob;
 using ARC.Data.Configuration;
 using ARC.Data.Cosmos;
@@ -13,6 +15,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddArcData(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<ArcDataOptions>(configuration.GetSection(ArcDataOptions.SectionName));
+
+        var vaultUri = ArcKeyVaultConfiguration.TryGetVaultUri(configuration);
+        if (vaultUri is not null)
+        {
+            services.AddSingleton(_ => new SecretClient(vaultUri, new DefaultAzureCredential()));
+            services.AddSingleton<IArcSecretStore, ArcSecretStore>();
+        }
 
         services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
         services.AddSingleton<IDealerRepository, DealerRepository>();

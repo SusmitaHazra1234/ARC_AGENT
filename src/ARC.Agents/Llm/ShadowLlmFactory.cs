@@ -1,9 +1,12 @@
 using Microsoft.Extensions.AI;
 
-namespace ARC.Api.Services;
+namespace ARC.Agents.Llm;
 
-/// <summary>Facts still come from tools. Empty narration keeps A8 running without model keys in this host.</summary>
-internal sealed class ShadowNarrationChatClient : IChatClient
+/// <summary>
+/// Shadow LLM. Tools still compute facts; empty narration keeps A1–A8 running without model keys.
+/// Swap this type in DI for <see cref="AzureOpenAILlmFactory"/> later.
+/// </summary>
+public sealed class ShadowLlmFactory : IChatClient
 {
     public Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,

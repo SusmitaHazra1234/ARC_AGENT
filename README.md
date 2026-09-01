@@ -79,7 +79,7 @@ Agent (explains; does not override numbers)
 src/
 ├── ARC.Domain           # Rules, entities, limitation clock, recovery state
 ├── ARC.Data             # SQL, Cosmos, Blob, Service Bus
-├── ARC.Knowledge        # Document Intelligence, retrieval, graph
+├── ARC.Knowledge        # Document Intelligence, Cosmos dense + Lucene lexical hybrid retrieval, graph
 ├── ARC.Tools            # Deterministic tools used by agents
 ├── ARC.Agents           # A1–A8, MAF workflows, Shadow outbound gate
 ├── ARC.Host.Functions   # Azure Functions host (timer / queues / resume)
@@ -96,7 +96,7 @@ tests/
 |---------|----------------|
 | ARC.Domain | Business rules and domain model |
 | ARC.Data | Persistence and messaging adapters |
-| ARC.Knowledge | Document and retrieval services |
+| ARC.Knowledge | Document Intelligence; Cosmos dense + Lucene BM25 hybrid search |
 | ARC.Tools | Authoritative tool operations |
 | ARC.Agents | Agents + MAF workflows |
 | ARC.Host.Functions | Hosted cycle and gate resume |
@@ -107,7 +107,7 @@ tests/
 | ARC.Eval | Acceptance evaluation |
 | ARC.Integration.Tests | Durable resume tests (Cosmos Emulator + SQL). See `tests/ARC.Integration.Tests/README.md`. |
 
-**Target framework:** .NET 9 (`net9.0`).
+**Target framework:** .NET 8 (`net8.0`).
 
 ---
 
@@ -352,6 +352,7 @@ Dashboard, gates, runs, and insights need Azure when data/messaging clients are 
 | Blob | Not used by CLI demo | `ArcData:Blob` |
 | Service Bus | In-memory recorder | `ArcData:ServiceBus` |
 | Document Intelligence | Not used by CLI demo | `ArcKnowledge:DocumentIntelligenceEndpoint` |
+| Document search | Not used by CLI demo | Cosmos dense (`embedding` + VectorDistance) + Lucene BM25 (`ArcKnowledge:LexicalIndexDirectory`), fused with RRF |
 | Outbound | Shadow suppressed | Shadow gate registered; Live not enabled |
 
 Host triggers: monthly ODOS timer, cycle fan-out queue, gate resume (Service Bus + HTTP `gates/resume`).
@@ -368,15 +369,15 @@ Host triggers: monthly ODOS timer, cycle fan-out queue, gate resume (Service Bus
 | `src/ARC.Cli/Properties/launchSettings.json` | CLI debug profiles |
 | Options: `ArcApiOptions`, `ArcHostOptions`, `ArcDataOptions`, `ArcKnowledgeOptions`, `ArcToolsOptions` | Typed config |
 
-Never commit secrets. Example placeholders only:
+Never commit secret values. The API and Functions host take only the vault URL, then load every secret from that vault:
 
 ```json
-"ArcData": {
-  "Sql": { "ConnectionString": "<YOUR_SQL_CONNECTION_STRING>" },
-  "Cosmos": { "AccountEndpoint": "<YOUR_COSMOS_ENDPOINT>" },
-  "ServiceBus": { "FullyQualifiedNamespace": "<YOUR_SB_NAMESPACE>.servicebus.windows.net" }
+"KeyVault": {
+  "VaultUri": "https://mcc-arc-key-vault.vault.azure.net/"
 }
 ```
+
+Use `az login` or a Visual Studio Azure account with **Key Vault Secrets User** on the vault. Nested config keys in the vault use `--` (for example `ArcData--Sql--ConnectionString`).
 
 ---
 
